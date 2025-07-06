@@ -5,6 +5,10 @@ import MobileNavbar from "./_component/Shared/Navbar/Mobile/MobileNavbar";
 import SearchBar from "./_component/Shared/Navbar/Mobile/SearchBar";
 import FloatingCart from "./_component/FloatingCart/page";
 import FloatingComponent from "./_component/cartDrawer/FloatingComponent";
+import { getServerSession } from "next-auth";
+
+import { CustomSession } from "@/types/session.type";
+import { authOptions } from "@/utils/authOptions";
 
 // Sample cart items
 const sampleItems = [
@@ -13,21 +17,26 @@ const sampleItems = [
     name: "Premium Headphones",
     price: 199.99,
     quantity: 1,
-    image: "/images/headphones.jpg"
+    image: "/images/headphones.jpg",
   },
   {
     id: 2,
     name: "Wireless Mouse",
     price: 49.99,
     quantity: 2,
-    image: "/images/mouse.jpg"
-  }
+    image: "/images/mouse.jpg",
+  },
 ];
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+export default async function HomeLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = (await getServerSession(authOptions)) as CustomSession | null;
   return (
     <div>
-      <Navbar />
+      <Navbar session={session} />
       <Box
         sx={{
           display: {
@@ -40,7 +49,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         <SearchBar />
       </Box>
       {children}
-      <FloatingComponent/>
+      <FloatingComponent />
       <FloatingCart initialItems={sampleItems} />
       <Box
         sx={{
@@ -63,10 +72,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         <MobileNavbar />
-      
       </Box>
     </div>
   );
-};
-
-export default layout;
+}

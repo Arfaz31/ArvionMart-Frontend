@@ -7,12 +7,13 @@ import Image from "next/image";
 import { TrendingUp } from "@mui/icons-material";
 
 const Category = () => {
-  const { data: category, isLoading } = useGetCategoriesQuery([
-    {
-      key: "sort",
-      value: "createdAt",
-    },
-  ]);
+  const { data: category, isLoading } = useGetCategoriesQuery("");
+  // [
+  //   {
+  //     key: "sort",
+  //     value: "createdAt",
+  //   },
+  // ]
 
   return (
     <Box

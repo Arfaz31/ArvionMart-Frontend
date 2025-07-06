@@ -10,6 +10,7 @@ type TInputProps = {
   sx?: SxProps;
   placeholder?: string;
   required?: boolean;
+  endAdornment?: React.ReactNode; // Add this to the main type
 };
 
 const ReuseableInput = ({
@@ -20,7 +21,8 @@ const ReuseableInput = ({
   fullWidth,
   sx,
   required,
-}: TInputProps & { endAdornment?: React.ReactNode }) => {
+  endAdornment, // Add this to destructured props
+}: TInputProps) => {
   const { control } = useFormContext();
   return (
     <Controller
@@ -39,6 +41,11 @@ const ReuseableInput = ({
           required={required}
           error={!!error?.message}
           helperText={error?.message}
+          slotProps={{
+            input: {
+              endAdornment: endAdornment,
+            },
+          }}
         />
       )}
     />
