@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Button, Menu, MenuItem } from "@mui/material";
+import { Box, Button, Menu, MenuItem, CircularProgress } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
 
 interface ICategory {
@@ -15,16 +16,22 @@ const CategoryDropdown = () => {
     null
   );
 
-  const { data: category } = useGetCategoriesQuery([
-    {
-      key: "fields",
-      value: "categoryName,subCategory",
-    },
-  ]);
+  const router = useRouter();
+  const { data: categories, isLoading: categoriesLoading } =
+    useGetCategoriesQuery("");
 
-  const handleCategoriesOpen = (event: React.MouseEvent<HTMLElement>) =>
+  const handleCategoriesOpen = (event: React.MouseEvent<HTMLElement>) => {
     setCategoriesAnchor(event.currentTarget);
-  const handleCategoriesClose = () => setCategoriesAnchor(null);
+  };
+
+  const handleCategoriesClose = () => {
+    setCategoriesAnchor(null);
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    router.push(`/all-products/${categoryId}`);
+    handleCategoriesClose();
+  };
 
   return (
     <Box>
@@ -40,27 +47,44 @@ const CategoryDropdown = () => {
         }}
         variant="text"
       >
-        Categories
+        All Categories
       </Button>
+
       <Menu
         anchorEl={categoriesAnchor}
-        open={categoriesAnchor !== null}
+        open={Boolean(categoriesAnchor)}
         onClose={handleCategoriesClose}
-        keepMounted
+        PaperProps={{
+          sx: {
+            width: "280px",
+            maxHeight: "400px",
+            overflow: "auto",
+            mt: 1,
+          },
+        }}
       >
-        <Box
-          sx={{
-            width: "300px",
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-          }}
-        >
-          {category?.data?.map((item: ICategory) => (
-            <MenuItem key={item._id} onClick={handleCategoriesClose}>
-              {item?.categoryName}
+        {categoriesLoading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : (
+          categories?.data?.map((category: ICategory) => (
+            <MenuItem
+              key={category._id}
+              onClick={() => handleCategoryClick(category._id)}
+              sx={{
+                padding: "12px 16px",
+                "&:hover": {
+                  backgroundColor: "#f5f5f5",
+                },
+                cursor: "pointer",
+                transition: "background-color 0.2s ease",
+              }}
+            >
+              {category.categoryName}
             </MenuItem>
-          ))}
-        </Box>
+          ))
+        )}
       </Menu>
     </Box>
   );

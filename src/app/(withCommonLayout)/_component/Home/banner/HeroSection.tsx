@@ -1,37 +1,50 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Box,
-  Typography,
-  Button,
   Container,
-  // IconButton,
   useTheme,
   useMediaQuery,
   Theme,
+  Skeleton,
 } from "@mui/material";
-import LocalMallIcon from "@mui/icons-material/LocalMall";
 import { styled } from "@mui/material/styles";
+import { useGetAllBannersQuery } from "@/redux/api/bannerApi";
 
-interface SlideType {
+interface BannerType {
+  _id: string;
   image: string;
-  badge: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  buttonText: string;
-  backgroundColor: string;
-  accentColor: string;
+  categoryId?: string;
+  subcategoryId?: string;
+  secondarySubcategoryId?: string;
+  productId?: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Enhanced styled components
+const SliderContainer = styled(Box)(() => ({
+  position: "relative",
+  overflow: "hidden",
+  width: "100%",
+  height: "500px",
+  borderRadius: "16px",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+  cursor: "pointer",
+  "@media (max-width: 768px)": {
+    height: "400px",
+    borderRadius: "12px",
+  },
+}));
 
 const SlideContainer = styled(Box)(() => ({
   width: "100%",
   height: "100%",
   display: "flex",
-  transition: "transform 0.6s cubic-bezier(0.45, 0, 0.2, 1)",
+  transition: "transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1)",
 }));
 
 const SlideContent = styled(Box)(() => ({
@@ -40,128 +53,76 @@ const SlideContent = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
   position: "relative",
-}));
-
-const SlideImage = styled(Box)(() => ({
-  width: "60%",
-  height: "100%",
-  position: "relative",
-  backgroundSize: "contain",
+  backgroundSize: "cover",
   backgroundPosition: "center",
   backgroundRepeat: "no-repeat",
-  transition: "transform 0.5s ease",
-  "&:hover": {
-    transform: "scale(1.02)",
-  },
-}));
-
-const ContentOverlay = styled(Box)(() => ({
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  alignItems: "center",
-  position: "relative",
-  zIndex: 2,
 }));
 
 const Indicator = styled(Box, {
   shouldForwardProp: (prop: string) => prop !== "active",
-})<{ active?: boolean }>(
-  ({ active, theme }: { active?: boolean; theme: Theme }) => ({
-    width: active ? "32px" : "12px",
-    height: "12px",
-    borderRadius: "6px",
-    backgroundColor: active ? theme.palette.primary.main : "rgba(0, 0, 0, 0.2)",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-  })
-);
-
-const ActionButton = styled(Button)(() => ({
-  padding: "12px 32px",
-  borderRadius: "30px",
-  fontSize: "1rem",
-  fontWeight: 600,
-  textTransform: "none",
-  boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
-  transition: "all 0.3s ease",
+})<{ active?: boolean }>(({ active }: { active?: boolean; theme: Theme }) => ({
+  width: active ? "40px" : "12px",
+  height: "12px",
+  borderRadius: "6px",
+  backgroundColor: active ? "#ffffff" : "rgba(255, 255, 255, 0.5)",
+  cursor: "pointer",
+  transition: "all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)",
   "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0px 6px 16px rgba(0, 0, 0, 0.2)",
+    backgroundColor: active ? "#ffffff" : "rgba(255, 255, 255, 0.8)",
+    transform: "scale(1.1)",
   },
 }));
 
-const TextHighlight = styled("span")(({ theme }: { theme: Theme }) => ({
-  color: theme.palette.primary.main,
-  fontWeight: 700,
+const LoadingSkeleton = styled(Box)(() => ({
+  width: "100%",
+  height: "500px",
+  borderRadius: "16px",
+  "@media (max-width: 768px)": {
+    height: "400px",
+  },
 }));
 
-const BadgeLabel = styled(Box)(() => ({
-  display: "inline-block",
-  backgroundColor: "#FF5722",
-  color: "white",
-  padding: "6px 12px",
-  borderRadius: "20px",
-  fontWeight: 600,
-  fontSize: "0.875rem",
-  marginBottom: "12px",
-  boxShadow: "0px 2px 8px rgba(255, 87, 34, 0.3)",
-}));
-
-const HeroSection = () => {
+const BannerSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMedium = useMediaQuery(theme.breakpoints.down("md"));
-  const isLarge = useMediaQuery(theme.breakpoints.down("lg"));
-  // const isExtraLarge = useMediaQuery(theme.breakpoints.down("xl"));
   const sliderRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
 
-  const slides: SlideType[] = [
-    {
-      image:
-        "https://res.cloudinary.com/dnom0fr0x/image/upload/v1744882848/wf24cp7kfsr-1744882848177-image-teal-shoes.png",
-      badge: "NEW ARRIVALS",
-      title: "Premium Sport Collection 2025",
-      subtitle: "Elevate your performance with cutting-edge design",
-      description:
-        "Experience unmatched comfort and style with our latest performance collection.",
-      buttonText: "Shop Collection",
-      backgroundColor: "#F6F9FC",
-      accentColor: "#00B8A9",
-    },
-    {
-      image:
-        "https://res.cloudinary.com/dnom0fr0x/image/upload/v1744881215/5wtna5ze7o3-1744881215180-image-shoes-removebg-preview.png",
-      badge: "TRENDING",
-      title: "Running Excellence Series",
-      subtitle: "Up to 40% off premium running shoes",
-      description:
-        "Engineered for marathon runners and everyday athletes seeking performance.",
-      buttonText: "Explore Now",
-      backgroundColor: "#F0F7FF",
-      accentColor: "#3D5AFE",
-    },
-    {
-      image:
-        "https://res.cloudinary.com/dnom0fr0x/image/upload/v1744883505/ang2hkq7rvk-1744883504947-image-orage-removebg-preview.png",
-      badge: "LIMITED EDITION",
-      title: "Exclusive Designer Collaboration",
-      subtitle: "Luxury meets performance",
-      description:
-        "Our signature collection crafted with premium materials and innovative technology.",
-      buttonText: "View Collection",
-      backgroundColor: "#FFF8E1",
-      accentColor: "#FF6F00",
-    },
-  ];
+  // Fetch banner data from API
+  const {
+    data: bannerData,
+    isLoading,
+    error,
+  } = useGetAllBannersQuery({
+    limit: 3,
+    page: 1,
+  });
 
+  const banners: BannerType[] = bannerData?.data || [];
+
+  // Handle banner click navigation
+  const handleBannerClick = (banner: BannerType) => {
+    if (banner.categoryId) {
+      router.push(`/all-products/${banner.categoryId}`);
+    } else if (banner.subcategoryId) {
+      router.push(`/all-products/${banner.subcategoryId}`);
+    } else if (banner.secondarySubcategoryId) {
+      router.push(`/all-products/${banner.secondarySubcategoryId}`);
+    } else if (banner.productId) {
+      router.push(`/product/${banner.productId}`);
+    }
+  };
+
+  // Auto-play functionality
   useEffect(() => {
+    if (banners.length <= 1) return;
+
     const play = () => {
       autoPlayRef.current = setTimeout(() => {
         nextSlide();
-      }, 10000);
+      }, 5000); // 5 seconds per slide
     };
 
     play();
@@ -171,11 +132,11 @@ const HeroSection = () => {
         clearTimeout(autoPlayRef.current);
       }
     };
-  }, [currentSlide]);
+  }, [currentSlide, banners.length]);
 
   const nextSlide = () => {
     setCurrentSlide((prev: number) =>
-      prev === slides.length - 1 ? 0 : prev + 1
+      prev === banners.length - 1 ? 0 : prev + 1
     );
     if (autoPlayRef.current) {
       clearTimeout(autoPlayRef.current);
@@ -189,6 +150,80 @@ const HeroSection = () => {
     }
   };
 
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        setCurrentSlide((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
+      } else if (e.key === "ArrowRight") {
+        nextSlide();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [banners.length]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: {
+            xs: "none",
+            sm: "block",
+            md: "block",
+            lg: "block",
+          },
+        }}
+      >
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <LoadingSkeleton>
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height="100%"
+              sx={{ borderRadius: "16px" }}
+            />
+          </LoadingSkeleton>
+        </Container>
+      </Box>
+    );
+  }
+
+  // Error state
+  if (error || !banners.length) {
+    return (
+      <Box
+        sx={{
+          display: {
+            xs: "none",
+            sm: "block",
+            md: "block",
+            lg: "block",
+          },
+        }}
+      >
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Box
+            sx={{
+              height: "600px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "16px",
+            }}
+          >
+            <Box sx={{ color: "text.secondary", fontSize: "1.1rem" }}>
+              No banners available at the moment
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -200,171 +235,122 @@ const HeroSection = () => {
         },
       }}
     >
-      <Box
-        sx={{
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <SlideContainer
-          sx={{
-            transform: `translateX(-${currentSlide * 100}%)`,
-          }}
-          ref={sliderRef}
-        >
-          {slides.map((slide, index) => (
-            <SlideContent key={index}>
-              <ContentOverlay sx={{ backgroundColor: slide.backgroundColor }}>
-                <Container maxWidth="xl">
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: isMobile ? "column-reverse" : "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                      height: "100%",
-                      padding: isMobile ? "30px 0" : 0,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: isMobile ? "100%" : "40%",
-                        height: isMobile ? "auto" : "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        alignItems: isMobile ? "center" : "flex-start",
-                        textAlign: isMobile ? "center" : "left",
-                        padding: isMobile
-                          ? "20px 16px 40px"
-                          : isLarge
-                          ? "0 0 0 10px"
-                          : "0 0 0 0px",
-                        zIndex: 5,
-                      }}
-                    >
-                      <BadgeLabel sx={{ backgroundColor: slide.accentColor }}>
-                        {slide.badge}
-                      </BadgeLabel>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <SliderContainer>
+          <SlideContainer
+            sx={{
+              transform: `translateX(-${currentSlide * 100}%)`,
+            }}
+            ref={sliderRef}
+          >
+            {banners.map((banner, index) => (
+              <SlideContent
+                key={banner._id}
+                sx={{
+                  backgroundImage: `url(${banner.image})`,
+                }}
+                onClick={() => handleBannerClick(banner)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Banner ${index + 1}`}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    handleBannerClick(banner);
+                  }
+                }}
+              />
+            ))}
+          </SlideContainer>
 
-                      <Typography
-                        variant="h3"
-                        component="h1"
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: isMobile
-                            ? "2rem"
-                            : isMedium
-                            ? "2.4rem"
-                            : "3rem",
-                          color: "#212121",
-                          lineHeight: 1.1,
-                          marginBottom: "16px",
-                          fontFamily: '"Montserrat", sans-serif',
-                          width: isMobile ? "100%" : "100%",
-                        }}
-                      >
-                        {slide?.title}
-                      </Typography>
-
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        sx={{
-                          color: "#424242",
-                          fontSize: isMobile ? "1.1rem" : "1.25rem",
-                          letterSpacing: "0.5px",
-                          fontWeight: 500,
-                          marginBottom: "12px",
-                        }}
-                      >
-                        <TextHighlight>{slide?.subtitle}</TextHighlight>
-                      </Typography>
-
-                      <Typography
-                        variant="body1"
-                        sx={{
-                          color: "#616161",
-                          marginBottom: "24px",
-                          maxWidth: "440px",
-                          display: isMobile ? "none" : "block",
-                        }}
-                      >
-                        {slide?.description}
-                      </Typography>
-
-                      <ActionButton
-                        variant="contained"
-                        size="large"
-                        startIcon={<LocalMallIcon />}
-                        sx={{
-                          backgroundColor: slide.accentColor,
-                          "&:hover": {
-                            backgroundColor: slide.accentColor,
-                            filter: "brightness(90%)",
-                          },
-                        }}
-                      >
-                        {slide?.buttonText}
-                      </ActionButton>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        width: isMobile ? "80%" : "60%",
-                        height: isMobile ? "250px" : "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        position: "relative",
-                      }}
-                    >
-                      <SlideImage
-                        sx={{
-                          backgroundImage: `url(${slide.image})`,
-                          height: isMedium ? "500px" : "600px",
-                          width: "100%",
-                        }}
-                      />
-                      {/* Decorative circle */}
-                    </Box>
-                  </Box>
-                </Container>
-              </ContentOverlay>
-            </SlideContent>
-          ))}
-        </SlideContainer>
-
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "30px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: "10px",
-            zIndex: 3,
-          }}
-        >
-          {slides.map((_, index) => (
-            <Indicator
-              key={index}
-              active={currentSlide === index}
-              onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
+          {/* Indicators */}
+          {banners.length > 1 && (
+            <Box
               sx={{
-                backgroundColor:
-                  currentSlide === index
-                    ? slides[currentSlide].accentColor
-                    : "rgba(0, 0, 0, 0.2)",
+                position: "absolute",
+                bottom: "30px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                display: "flex",
+                gap: "12px",
+                zIndex: 3,
               }}
-            />
-          ))}
-        </Box>
-      </Box>
+            >
+              {banners.map((_, index) => (
+                <Indicator
+                  key={index}
+                  active={currentSlide === index}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </Box>
+          )}
+
+          {/* Navigation arrows for larger screens */}
+          {banners.length > 1 && !isMobile && (
+            <>
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: "20px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  zIndex: 3,
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  backdropFilter: "blur(10px)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    transform: "translateY(-50%) scale(1.1)",
+                  },
+                }}
+                onClick={() =>
+                  setCurrentSlide((prev) =>
+                    prev === 0 ? banners.length - 1 : prev - 1
+                  )
+                }
+              >
+                <Box sx={{ color: "white", fontSize: "1.5rem" }}>‹</Box>
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  right: "20px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  zIndex: 3,
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  backdropFilter: "blur(10px)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    transform: "translateY(-50%) scale(1.1)",
+                  },
+                }}
+                onClick={nextSlide}
+              >
+                <Box sx={{ color: "white", fontSize: "1.5rem" }}>›</Box>
+              </Box>
+            </>
+          )}
+        </SliderContainer>
+      </Container>
     </Box>
   );
 };
 
-export default HeroSection;
+export default BannerSlider;

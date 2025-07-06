@@ -12,5 +12,11 @@ export const baseApi = createApi({
     "SubCategory",
     "Brand",
     "Subcategory",
+    "SecondarySubcategory",
+    "Variant",
+    "Order",
+    "Review",
+    "Banner",
+    "PromotionalCard",
   ],
 });

@@ -23,11 +23,9 @@ const HomeProduct = () => {
   >([{ key: "category", value: "MEN" }]);
   const [value, setValue] = React.useState(0);
 
-  const { data: category } = useGetCategoriesQuery([
-    { key: "sort", value: "createdAt" },
-  ]);
+  const { data: category } = useGetCategoriesQuery("");
 
-  const { data: productData } = useGetAllProductsQuery(filterData);
+  const { data: productData } = useGetAllProductsQuery("");
 
   const a11yProps = (index: number) => {
     return {

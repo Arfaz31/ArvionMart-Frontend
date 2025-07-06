@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -28,20 +29,29 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import CategoryDropdown from "./Dropdwon/CategoryDropdown";
+import { logout } from "@/Services/authServices";
+import { signOut } from "next-auth/react";
+import { toast } from "sonner";
+import logo from "@/assests/logo/LogoAnimated.gif";
+import Image from "next/image";
 
-const Navbar = () => {
-  const [brandsAnchor, setBrandsAnchor] = useState<null | HTMLElement>(null);
+type UserProps = {
+  user?: {
+    _id?: string | null | undefined;
+    userId?: string | null | undefined;
+    email?: string | null | undefined;
+    role?: string | null | undefined;
+  };
+};
+
+const Navbar = ({ session }: { session: UserProps | null }) => {
   const [accountAnchor, setAccountAnchor] = useState<null | HTMLElement>(null);
   const [promotionsAnchor, setPromotionsAnchor] = useState<null | HTMLElement>(
     null
   );
   const [supportAnchor, setSupportAnchor] = useState<null | HTMLElement>(null);
 
-  const { user } = useSelector((state: RootState) => state.auth);
-
-  const handleBrandsOpen = (event: React.MouseEvent<HTMLElement>) =>
-    setBrandsAnchor(event.currentTarget);
-  const handleBrandsClose = () => setBrandsAnchor(null);
+  const { user } = useSelector((state: RootState) => state.auth as any);
 
   const handleAccountOpen = (event: React.MouseEvent<HTMLElement>) =>
     setAccountAnchor(event.currentTarget);
@@ -56,18 +66,21 @@ const Navbar = () => {
   const handleSupportClose = () => setSupportAnchor(null);
 
   const router = useRouter();
-  const handleLogout = () => {
-    router.push("/login");
-  };
+  const handleLogout = async () => {
+    try {
+      // First sign out with Next-Auth
+      await signOut({ redirect: false });
 
-  const brandItems = [
-    "Nike",
-    "Adidas",
-    "Puma",
-    "New Balance",
-    "Converse",
-    "Vans",
-  ];
+      // Then clear Redux and cookies
+      await logout();
+
+      // Finally redirect
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  };
 
   const accountItems = ["Profile", "Orders", "Saved Items", "Settings"];
 
@@ -134,7 +147,7 @@ const Navbar = () => {
                   onClose={handleAccountClose}
                   keepMounted
                 >
-                  {user?.email
+                  {user?.email || session?.user
                     ? [
                         ...accountItems.map((item) => (
                           <MenuItem key={item} onClick={handleAccountClose}>
@@ -150,10 +163,16 @@ const Navbar = () => {
                       ]
                     : /* When user is not logged in */
                       [
-                        <MenuItem key="login" onClick={handleAccountClose}>
+                        <MenuItem
+                          key="login"
+                          onClick={() => router.push("/login")}
+                        >
                           Login
                         </MenuItem>,
-                        <MenuItem key="register" onClick={handleAccountClose}>
+                        <MenuItem
+                          key="register"
+                          onClick={() => router.push("/register")}
+                        >
                           Register
                         </MenuItem>,
                       ]}
@@ -233,56 +252,70 @@ const Navbar = () => {
         <Container maxWidth="xl">
           <Toolbar
             disableGutters
-            sx={{ justifyContent: "space-between", py: 1 }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              py: 2,
+              minHeight: 64,
+            }}
           >
-            {/* Logo */}
-            <Link
-              href="/"
-              underline="none"
-              sx={{ display: "flex", alignItems: "center" }}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                width: "200px",
+                flexShrink: 0,
+              }}
             >
-              <Box
+              <Link
+                href="/"
+                underline="none"
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  bgcolor: "#20b2aa",
-                  color: "white",
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1,
-                  mr: 1,
+                  height: "48px",
                 }}
               >
-                <ShoppingBagOutlinedIcon />
-              </Box>
-              <Typography
-                variant="h5"
-                component="div"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: ".05rem",
-                  color: "#333",
-                }}
-              >
-                PrimeShoes
-              </Typography>
-            </Link>
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: "160px",
+                    height: "70px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Image
+                    src={logo}
+                    alt="Arvion Mart Logo"
+                    width={160}
+                    height={70}
+                    style={{
+                      objectFit: "contain",
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                    }}
+                    priority
+                  />
+                </Box>
+              </Link>
+            </Box>
 
-            {/* Navigation links */}
             <Box
               sx={{
                 display: { xs: "none", md: "flex" },
-                flexGrow: 1,
+                alignItems: "center",
                 justifyContent: "center",
+                flexGrow: 1,
+                gap: 2,
               }}
             >
-              {/* Home Link */}
-              <Link href="/">
+              <Link href="/" style={{ textDecoration: "none" }}>
                 <Button
                   sx={{
                     color: "#333",
-                    mx: 1.5,
                     textTransform: "none",
                     fontWeight: 500,
                     "&:hover": { bgcolor: "transparent", color: "#666" },
@@ -293,74 +326,27 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              {/* Categories Dropdown */}
               <CategoryDropdown />
 
-              {/* Brands Dropdown */}
-              <Button
-                endIcon={<KeyboardArrowDownIcon />}
-                onClick={handleBrandsOpen}
-                sx={{
-                  color: "#333",
-                  mx: 1.5,
-                  textTransform: "none",
-                  fontWeight: 500,
-                  "&:hover": { bgcolor: "transparent", color: "#666" },
-                }}
-                variant="text"
-              >
-                Brands
-              </Button>
-              <Menu
-                anchorEl={brandsAnchor}
-                open={brandsAnchor !== null}
-                onClose={handleBrandsClose}
-                keepMounted
-              >
-                {brandItems.map((item) => (
-                  <MenuItem key={item} onClick={handleBrandsClose}>
-                    {item}
-                  </MenuItem>
-                ))}
-              </Menu>
-
-              {/* About Link */}
-              {/* <Link href="/about">
+              <Link href="/brands" style={{ textDecoration: "none" }}>
                 <Button
                   sx={{
                     color: "#333",
-                    mx: 1.5,
                     textTransform: "none",
                     fontWeight: 500,
                     "&:hover": { bgcolor: "transparent", color: "#666" },
                   }}
                   variant="text"
                 >
-                  About
+                  All Brands
                 </Button>
               </Link>
-
-              <Link href="/contact">
-                <Button
-                  sx={{
-                    color: "#333",
-                    mx: 1.5,
-                    textTransform: "none",
-                    fontWeight: 500,
-                    "&:hover": { bgcolor: "transparent", color: "#666" },
-                  }}
-                  variant="text"
-                >
-                  Contact
-                </Button>
-              </Link> */}
 
               <Button
                 endIcon={<KeyboardArrowDownIcon />}
                 onClick={handleSupportOpen}
                 sx={{
                   color: "#333",
-                  mx: 1.5,
                   textTransform: "none",
                   fontWeight: 500,
                   "&:hover": { bgcolor: "transparent", color: "#666" },
@@ -393,61 +379,80 @@ const Navbar = () => {
               </Menu>
             </Box>
 
-            {/* Right icons section */}
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              {/* Search Bar */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                width: "300px",
+                justifyContent: "flex-end",
+                flexShrink: 0,
+                gap: 1,
+              }}
+            >
               <Box
                 sx={{
                   position: "relative",
                   display: "flex",
                   alignItems: "center",
-                  border: "1px solid #e0e0e0",
-                  borderRadius: 1,
-                  backgroundColor: "#f9f9f9",
-                  mr: 2,
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  backgroundColor: "#ffffff",
+                  transition: "all 0.2s ease",
                   "&:hover": {
-                    backgroundColor: "#f5f5f5",
+                    borderColor: "#1565c0",
+                  },
+                  "&:focus-within": {
+                    borderColor: "#1565c0",
+                    boxShadow: "0 0 0 3px rgba(21, 101, 192, 0.1)",
                   },
                 }}
               >
                 <InputBase
                   placeholder="Search..."
                   sx={{
-                    ml: 1,
+                    ml: 2,
                     flex: 1,
                     fontSize: "0.875rem",
+                    color: "#374151",
                     width: { xs: "80px", sm: "140px" },
+                    "& .MuiInputBase-input": {
+                      padding: "10px 0",
+                      "&::placeholder": {
+                        color: "#9ca3af",
+                        opacity: 1,
+                      },
+                    },
                   }}
                 />
-                <IconButton type="button" aria-label="search" sx={{ p: "4px" }}>
-                  <SearchIcon />
+                <IconButton
+                  type="button"
+                  aria-label="search"
+                  sx={{
+                    p: "8px",
+                    mr: 0.5,
+                    color: "#6b7280",
+                    transition: "color 0.2s ease",
+                    "&:hover": {
+                      color: "#1565c0",
+                      backgroundColor: "rgba(21, 101, 192, 0.05)",
+                    },
+                  }}
+                >
+                  <SearchIcon sx={{ fontSize: "1.1rem" }} />
                 </IconButton>
               </Box>
 
-              {/* Wishlist */}
-              <IconButton aria-label="favorites" sx={{ color: "#555", mx: 1 }}>
+              <IconButton aria-label="favorites" sx={{ color: "#555" }}>
                 <Badge badgeContent={0} color="error">
                   <FavoriteBorderIcon />
                 </Badge>
               </IconButton>
 
-              {/* Shopping Cart */}
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <IconButton aria-label="cart" sx={{ color: "#555" }}>
-                  <Badge badgeContent={0} color="error">
-                    <ShoppingBagOutlinedIcon />
-                  </Badge>
-                </IconButton>
-                {/* <Typography variant="body2" component="div" sx={{ ml: 1 }}>
-                  <Typography component="span" sx={{ fontWeight: 500 }}>
-                    0
-                  </Typography>
-                  <Typography component="span" sx={{ color: "#777" }}>
-                    {" "}
-                    / €0.00
-                  </Typography>
-                </Typography> */}
-              </Box>
+              <IconButton aria-label="cart" sx={{ color: "#555" }}>
+                <Badge badgeContent={0} color="error">
+                  <ShoppingBagOutlinedIcon />
+                </Badge>
+              </IconButton>
             </Box>
           </Toolbar>
         </Container>

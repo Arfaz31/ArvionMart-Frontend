@@ -14,17 +14,7 @@ export const registerSchema = z.object({
     .regex(/^\d+$/, { message: "Mobile number must be a valid number" }) // Ensures only digits
     .min(10, { message: "Mobile number must be at least 10 digits" })
     .max(15, { message: "Mobile number must not exceed 15 digits" }),
-  emergencyContact: z
-    .string({
-      required_error: "Mobile number is required",
-    })
-    .regex(/^\d+$/, { message: "Mobile number must be a valid number" }) // Ensures only digits
-    .min(10, { message: "Mobile number must be at least 10 digits" })
-    .max(15, { message: "Mobile number must not exceed 15 digits" }),
 
-  // gender: z.enum(["male", "female"], {
-  //   required_error: "Gender is required",
-  // }),
   address: z.string().min(2, "Address must be at least 2 characters"),
 });
 
