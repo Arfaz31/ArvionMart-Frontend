@@ -121,7 +121,12 @@ const PromoCardPage = () => {
       <Typography
         variant="h4"
         gutterBottom
-        sx={{ marginBottom: 4, marginTop: 5, textAlign: "center" }}
+        sx={{
+          marginBottom: 4,
+          marginTop: 5,
+          textAlign: "center",
+          fontWeight: 700,
+        }}
       >
         Best Deals
       </Typography>
