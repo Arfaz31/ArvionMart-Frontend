@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardMedia,
@@ -10,20 +11,55 @@ import {
   Box,
   Button,
   Chip,
-  Rating,
   Skeleton,
+  Tooltip,
 } from "@mui/material";
-
-import { IProduct } from "@/types/types";
 import {
-  AddShoppingCart,
   Favorite,
   FavoriteBorder,
+  ShoppingCart,
   Visibility,
 } from "@mui/icons-material";
-import Link from "next/link";
+
+interface IVariant {
+  _id: string;
+  sellingPrice: number;
+  discount?: number;
+  image?: string[];
+  features?: string[];
+}
+
+// Provide default values for the variant
+const DEFAULT_VARIANT: IVariant = {
+  _id: "",
+  sellingPrice: 0,
+  discount: 0,
+  image: [],
+  features: [],
+};
+
+interface IProduct {
+  _id: string;
+  productName: string;
+  description: string;
+  brand?: {
+    _id: string;
+    brandName: string;
+    brandLogo?: string;
+  };
+  category?: {
+    _id: string;
+    categoryName: string;
+  };
+  stock: number;
+  isActive: boolean;
+  isNewArrival?: boolean;
+  variant?: IVariant[];
+  createdAt?: string;
+}
 
 const ProductCard = ({ product }: { product: IProduct }) => {
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -34,80 +70,110 @@ const ProductCard = ({ product }: { product: IProduct }) => {
     setIsFavorite(!isFavorite);
   };
 
+  const handleProductClick = () => {
+    router.push(`/product/${product._id}`);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Add to cart logic here
+  };
+
+  const primaryVariant: IVariant = product.variant?.[0] || DEFAULT_VARIANT;
+  const primaryImage = primaryVariant.image?.[0] || "/placeholder-product.jpg";
+  const sellingPrice = primaryVariant.sellingPrice;
+  const discount = primaryVariant.discount || 0;
+  const discountedPrice = sellingPrice - (sellingPrice * discount) / 100;
+
   return (
     <Card
+      elevation={isHovered ? 6 : 2}
       sx={{
         height: "100%",
-        width: "250px",
         display: "flex",
         flexDirection: "column",
         position: "relative",
         transition: "all 0.3s ease",
         borderRadius: 2,
         overflow: "hidden",
-
         cursor: "pointer",
+        "&:hover": {
+          transform: "translateY(-5px)",
+        },
       }}
+      onClick={handleProductClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Category badge */}
-      <Chip
-        label={product?.category?.categoryName}
-        size="small"
-        sx={{
-          position: "absolute",
-          top: 12,
-          left: 12,
-          zIndex: 2,
-          bgcolor: "primary.main",
-          color: "white",
-          fontWeight: 500,
-          fontSize: "0.75rem",
-        }}
-      />
+      {/* Badges */}
+      <Box sx={{ position: "absolute", top: 8, left: 8, zIndex: 1 }}>
+        {product.isNewArrival && (
+          <Chip
+            label="New"
+            color="primary"
+            size="small"
+            sx={{ fontWeight: 600, mr: 1 }}
+          />
+        )}
+        {product.stock <= 0 && (
+          <Chip
+            label="Out of Stock"
+            color="error"
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        )}
+        {discount > 0 && (
+          <Chip
+            label={`${discount}% OFF`}
+            color="secondary"
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        )}
+      </Box>
 
       {/* Favorite button */}
-      <IconButton
-        size="small"
-        onClick={handleFavoriteClick}
-        sx={{
-          position: "absolute",
-          top: 12,
-          right: 12,
-          zIndex: 2,
-
-          "&:hover": {
-            bgcolor: "background.paper",
-            transform: "scale(1.1)",
-          },
-        }}
-      >
-        {isFavorite ? (
-          <Favorite fontSize="small" color="error" />
-        ) : (
-          <FavoriteBorder fontSize="small" />
-        )}
-      </IconButton>
+      <Tooltip title={isFavorite ? "Remove from wishlist" : "Add to wishlist"}>
+        <IconButton
+          size="small"
+          onClick={handleFavoriteClick}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            zIndex: 1,
+            backgroundColor: "background.paper",
+            "&:hover": {
+              backgroundColor: "background.paper",
+            },
+          }}
+        >
+          {isFavorite ? (
+            <Favorite color="error" fontSize="small" />
+          ) : (
+            <FavoriteBorder fontSize="small" />
+          )}
+        </IconButton>
+      </Tooltip>
 
       {/* Product image */}
-      <Box sx={{ position: "relative", pt: "75%", width: "100%" }}>
+      <Box sx={{ position: "relative", pt: "100%" }}>
         {!imageLoaded && (
           <Skeleton
             variant="rectangular"
-            animation="wave"
+            width="100%"
+            height="100%"
             sx={{
               position: "absolute",
               top: 0,
               left: 0,
-              width: "100%",
-              height: "100%",
             }}
           />
         )}
         <CardMedia
           component="img"
-          image={product.images[0]}
+          image={primaryImage}
           alt={product.productName}
           onLoad={() => setImageLoaded(true)}
           sx={{
@@ -118,110 +184,96 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             height: "100%",
             objectFit: "cover",
             transition: "transform 0.5s ease",
-            transform: isHovered ? "scale(1.08)" : "scale(1)",
+            transform: isHovered ? "scale(1.05)" : "scale(1)",
           }}
         />
 
-        {/* View Details button - appears on hover */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            opacity: isHovered ? 1 : 0,
-            transform: isHovered ? "translateY(0)" : "translateY(20px)",
-            transition: "all 0.3s ease",
-            p: 2,
-          }}
-        >
-          <Link href={`/products/${product._id}`}>
+        {/* Quick View Button - appears on hover */}
+        {isHovered && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 16,
+              left: 0,
+              right: 0,
+              display: "flex",
+              justifyContent: "center",
+              opacity: isHovered ? 1 : 0,
+              transition: "opacity 0.3s ease",
+            }}
+          >
             <Button
-              startIcon={<Visibility />}
               variant="contained"
               size="small"
+              startIcon={<Visibility fontSize="small" />}
               sx={{
-                bgcolor: "rgba(255,255,255,0.9)",
+                backgroundColor: "background.paper",
                 color: "text.primary",
-                boxShadow: 2,
                 fontWeight: 600,
+                boxShadow: 2,
                 "&:hover": {
-                  bgcolor: "white",
+                  backgroundColor: "background.paper",
                 },
               }}
             >
-              View Details
+              Quick View
             </Button>
-          </Link>
-        </Box>
+          </Box>
+        )}
       </Box>
 
       {/* Product content */}
-      <CardContent sx={{ flexGrow: 1, pt: 2 }}>
-        <Link
-          href={`/products/${product._id}`}
-          style={{ textDecoration: "none" }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              height: "2.5rem",
-              overflow: "hidden",
-              color: "text.primary",
-              textDecoration: "none",
-              "&:hover": {
-                color: "primary.main",
-              },
-            }}
-          >
-            {product.productName}
-          </Typography>
-        </Link>
-
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <Rating
-            value={product.totalReviews}
-            precision={0.5}
-            size="small"
-            readOnly
-          />
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-            ({product.totalReviews} reviews)
-          </Typography>
-        </Box>
-
+      <CardContent sx={{ flexGrow: 1 }}>
         <Typography
-          variant="h6"
+          variant="subtitle1"
+          fontWeight={600}
           sx={{
-            fontWeight: 700,
-            color: "primary.main",
-            mt: "auto",
+            mb: 1,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
-          ${product.price.toFixed(2)}
+          {product.productName}
         </Typography>
+
+        {product.brand && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {product.brand.brandName}
+          </Typography>
+        )}
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Typography variant="h6" fontWeight={700} color="primary.main">
+            ${discountedPrice.toFixed(2)}
+          </Typography>
+          {discount > 0 && (
+            <Typography
+              variant="body2"
+              color="text.disabled"
+              sx={{ textDecoration: "line-through" }}
+            >
+              ${sellingPrice.toFixed(2)}
+            </Typography>
+          )}
+        </Box>
       </CardContent>
 
-      {/* Action buttons */}
-      <CardActions
-        sx={{ pt: 0, pb: 2, px: 2, justifyContent: "space-between" }}
-      >
+      {/* Add to cart button */}
+      <CardActions sx={{ p: 2, pt: 0 }}>
         <Button
+          fullWidth
           variant="contained"
-          startIcon={<AddShoppingCart />}
+          startIcon={<ShoppingCart />}
           size="small"
+          disabled={product.stock <= 0}
+          onClick={handleAddToCart}
           sx={{
-            flexGrow: 1,
             fontWeight: 600,
-            boxShadow: 1,
             borderRadius: 1,
-            height: "30px",
           }}
         >
-          Add to Cart
+          {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
         </Button>
       </CardActions>
     </Card>

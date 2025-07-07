@@ -18,5 +18,7 @@ export const baseApi = createApi({
     "Review",
     "Banner",
     "PromotionalCard",
+    "BrandOffer",
+    "PromotionalBanner",
   ],
 });
