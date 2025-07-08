@@ -22,8 +22,8 @@ const Category = () => {
   return (
     <Box
       sx={{
-        marginTop: { lg: "10px", xs: "10px" },
-        paddingBottom: { lg: "100px", xs: "150px" },
+        marginTop: { lg: "10px", xs: "15px" },
+        paddingBottom: { lg: "50px", xs: "50px" },
       }}
     >
       <Container>
@@ -33,7 +33,7 @@ const Category = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: "40px",
+              marginBottom: "10px",
             }}
           >
             <Typography

@@ -35,8 +35,8 @@ const BrandOffer = () => {
   return (
     <Box
       sx={{
-        marginTop: { lg: "10px", xs: "10px" },
-        paddingBottom: { lg: "20px", xs: "50px" },
+        marginTop: { lg: "5px", xs: "5px" },
+        paddingBottom: { lg: "10px", xs: "25px" },
       }}
     >
       <Container>
@@ -45,16 +45,16 @@ const BrandOffer = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            marginBottom: "40px",
+            marginBottom: "20px",
           }}
         >
           <Typography
-            variant="h4"
+            variant="h5"
             component="h2"
             sx={{
               fontWeight: 700,
               position: "relative",
-              fontSize: { xs: "h6", sm: "h5", md: "h4" },
+              fontSize: { xs: "h5", sm: "h5", md: "h4" },
             }}
           >
             Top Brands & Offers

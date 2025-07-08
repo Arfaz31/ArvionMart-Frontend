@@ -109,7 +109,7 @@ const PromotionalBanner = () => {
     <BannerContainer
       maxWidth="xl"
       sx={{
-        paddingBottom: { lg: "100px", xs: "50px" },
+        paddingBottom: { lg: "50px", xs: "25px" },
       }}
     >
       {banners.map((banner: any) => (

@@ -23,9 +23,9 @@ interface PromoBannerType {
 }
 
 const PromoCardContainer = styled(Container)(({ theme }) => ({
-  padding: theme.spacing(4, 0),
+  padding: theme.spacing(4, 2),
   [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(2, 0),
+    padding: theme.spacing(2, 1),
   },
 }));
 
@@ -36,7 +36,7 @@ const PromoCardItem = styled(Box)(({ theme }) => ({
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   cursor: "pointer",
   height: "100%",
-  padding: theme.spacing(1), // Add padding to create space from borders
+  margin: theme.spacing(1), // Add margin to create space from borders
   "&:hover": {
     transform: "translateY(-5px)",
     boxShadow: theme.shadows[2],
@@ -48,10 +48,11 @@ const PromoImage = styled(Box)(() => ({
   borderRadius:"12px",
   position: "relative",
   aspectRatio: "4 / 4", // Fixed aspect ratio
+  overflow: "hidden", // Ensure the image respects the border radius
 }));
 
 const LoadingSkeleton = () => (
-  <Grid container spacing={3}>
+  <Grid container spacing={2}>
     {[1, 2, 3, 4].map((item) => (
       <Grid size={{ xs: 6, sm: 6, md: 3 }} key={item}>
         <Skeleton
@@ -94,7 +95,7 @@ const PromoCardPage = () => {
 
   if (isLoading) {
     return (
-      <PromoCardContainer maxWidth="lg">
+      <PromoCardContainer maxWidth="xl">
         <LoadingSkeleton />
       </PromoCardContainer>
     );
@@ -102,7 +103,7 @@ const PromoCardPage = () => {
 
   if (error || !promoBanners.length) {
     return (
-      <PromoCardContainer maxWidth="lg">
+      <PromoCardContainer maxWidth="xl">
         <Box
           textAlign="center"
           py={10}
@@ -119,13 +120,13 @@ const PromoCardPage = () => {
   }
 
   return (
-    <PromoCardContainer maxWidth="lg">
+    <PromoCardContainer maxWidth="xl">
       <Typography
         variant="h5"
         gutterBottom
         sx={{
-          marginBottom: 4,
-          marginTop: 5,
+          marginBottom: 2,
+          marginTop: 0,
           textAlign: "center",
           fontWeight: 700,
           [theme.breakpoints.down("sm")]: {
@@ -135,7 +136,7 @@ const PromoCardPage = () => {
       >
         Best Deals
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         {promoBanners.map((banner) => (
           <Grid size={{ xs: 6, sm: 6, md: 3 }} key={banner._id}>
             <PromoCardItem onClick={() => handleCardClick(banner)}>

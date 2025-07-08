@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import * as React from 'react';
 import {
@@ -5,13 +6,13 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  Paper,
+  
   Drawer,
   Box,
   List,
   ListItem,
   ListItemText,
-  Collapse,
+ 
   Divider,
 } from '@mui/material';
 import {
@@ -20,42 +21,48 @@ import {
   ShoppingBagOutlined,
   PersonOutline,
   Menu as MenuIcon,
-  ExpandLess,
-  ChevronRight,
+ 
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMounted } from '@/hooks/use-mounted';
 
-// Mock data for categories - replace with actual data fetching
-const categories = [
-  {
-    name: 'Electronics',
-    subcategories: ['Smartphones', 'Laptops', 'Tablets'],
-  },
-  {
-    name: 'Fashion',
-    subcategories:["Men's", "Women's", 'Kids'],
-  },
-  {
-    name: 'Home & Garden',
-    subcategories: ['Furniture', 'Decor', 'Gardening'],
-  },
-];
+
+
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/Services/authServices';
+import { signOut } from 'next-auth/react';
+import { toast } from 'sonner';
 
 const MobileNavbar = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const [openCategory, setOpenCategory] = React.useState<string | null>(null);
+
   const pathname = usePathname();
   const mounted = useMounted();
+
+  const { user } = useSelector((state: RootState) => state.auth as any);
+  const router = useRouter();
+
+ 
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    }
+  };
 
   const toggleDrawer = (open: boolean) => () => {
     setDrawerOpen(open);
   };
 
-  const handleCategoryClick = (category: string) => {
-    setOpenCategory(openCategory === category ? null : category);
-  };
+ 
 
   if (!mounted) {
     return null;
@@ -71,35 +78,28 @@ const MobileNavbar = () => {
         Menu
       </Typography>
       <List>
-        <ListItem component={Link} href="/all-products">
-          <ListItemText primary="All Products" />
-        </ListItem>
-        {categories.map((category) => (
-          <React.Fragment key={category.name}>
-            <ListItem button onClick={() => handleCategoryClick(category.name)}>
-              <ListItemText primary={category.name} />
-              {openCategory === category.name ? <ExpandLess /> : <ChevronRight />}
+        {user?.email ? (
+          <>
+            <ListItem component={Link} href="/profile">
+              <ListItemText primary="Profile" />
             </ListItem>
-            <Collapse
-              in={openCategory === category.name}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                {category.subcategories.map((sub) => (
-                  <ListItem
-                    key={sub}
-                    sx={{ pl: 4 }}
-                    component={Link}
-                    href={`/products?category=${category.name}&subcategory=${sub}`}
-                  >
-                    <ListItemText primary={sub} />
-                  </ListItem>
-                ))}
-              </List>
-            </Collapse>
-          </React.Fragment>
-        ))}
+            <ListItem component={Link} href="/orders">
+              <ListItemText primary="Orders" />
+            </ListItem>
+            <ListItem onClick={handleLogout}>
+              <ListItemText primary="Logout" />
+            </ListItem>
+          </>
+        ) : (
+          <>
+            <ListItem component={Link} href="/login">
+              <ListItemText primary="Login" />
+            </ListItem>
+            <ListItem component={Link} href="/register">
+              <ListItemText primary="Register" />
+            </ListItem>
+          </>
+        )}
         <Divider sx={{ marginY: '1rem' }} />
         <ListItem component={Link} href="/brands">
           <ListItemText primary="All Brands" />
@@ -119,67 +119,48 @@ const MobileNavbar = () => {
     { href: '/wishlist', label: 'Wishlist', icon: <FavoriteBorder /> },
     { href: '/cart', label: 'Cart', icon: <ShoppingBagOutlined /> },
     { href: '/login', label: 'Account', icon: <PersonOutline /> },
+    { href: '#', label: 'Menu', icon: <MenuIcon />, onClick: toggleDrawer(true) },
   ];
 
   return (
     <>
-      <Paper
-        elevation={3}
+      <AppBar
+        position="fixed"
         sx={{
-          position: 'fixed',
+          top: 'auto',
           bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
           display: { xs: 'block', md: 'none' },
+          background: 'white',
+          boxShadow: '0 -1px 4px rgba(0,0,0,0.1)',
         }}
       >
-        <AppBar
-          position="static"
-          sx={{ background: 'white', boxShadow: 'none' }}
-        >
-          <Toolbar
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-around',
-              alignItems: 'center',
-            }}
-          >
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={toggleDrawer(true)}
-              sx={{ color: '#555' }}
-            >
-              <MenuIcon />
-            </IconButton>
-            {navItems.map((item) => (
-              <Link href={item.href} passHref key={item.label}>
-                <IconButton
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-around' }}>
+          {navItems.map((item) => (
+            <Link href={item.href} passHref key={item.label}>
+              <IconButton
+                onClick={item.onClick}
+                sx={{
+                  flexDirection: 'column',
+                  color: pathname === item.href ? 'primary.main' : '#555',
+                  borderRadius: '8px',
+                  padding: '4px 8px',
+                }}
+              >
+                {item.icon}
+                <Typography
+                  variant="caption"
                   sx={{
-                    flexDirection: 'column',
-                    color: pathname === item.href ? 'primary.main' : '#555',
-                    borderRadius: '8px',
-                    padding: '4px 8px',
+                    marginTop: '2px',
+                    fontWeight: pathname === item.href ? 'bold' : 'normal',
                   }}
                 >
-                  {item.icon}
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      marginTop: '2px',
-                      fontWeight: pathname === item.href ? 'bold' : 'normal',
-                    }}
-                  >
-                    {item.label}
-                  </Typography>
-                </IconButton>
-              </Link>
-            ))}
-          </Toolbar>
-        </AppBar>
-      </Paper>
+                  {item.label}
+                </Typography>
+              </IconButton>
+            </Link>
+          ))}
+        </Toolbar>
+      </AppBar>
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
         {drawerContent}
       </Drawer>

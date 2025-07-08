@@ -24,7 +24,7 @@ const NewArrivalProduct = () => {
   return (
     <Box
       sx={{
-        paddingBottom: { lg: "100px", xs: "50px" },
+        paddingBottom: { lg: "50px", xs: "80px" },
         backgroundColor: "#f9f9f9",
       }}
     >
@@ -38,7 +38,7 @@ const NewArrivalProduct = () => {
           }}
         >
           <Typography
-            variant="h4"
+            variant="h5"
             component="h2"
             sx={{
               fontWeight: 700,
@@ -46,7 +46,7 @@ const NewArrivalProduct = () => {
               fontSize: { xs: "h6", sm: "h5", md: "h4" },
             }}
           >
-            NEW ARRIVALS
+            New Arrivals
           </Typography>
         </Box>
 

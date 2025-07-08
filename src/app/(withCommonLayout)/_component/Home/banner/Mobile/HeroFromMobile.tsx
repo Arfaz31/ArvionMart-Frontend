@@ -76,7 +76,7 @@ const HeroFromMobile = () => {
         sx={{
           display: { xs: "block", sm: "none", md: "none" },
           position: "relative",
-          height: "150px",
+          height: "120px",
           overflow: "hidden",
           borderRadius: 2,
           bgcolor: slides[currentSlide].backgroundColor,
