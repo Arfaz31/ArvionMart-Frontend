@@ -377,7 +377,7 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ initialItems = [] }) => {
                         border: `1px solid ${theme.palette.divider}`,
                       }}>
                         <Image
-                          src={item.image}
+                          src={item.image || '/file.svg'} // Fallback to a placeholder if item.image is falsy
                           alt={item.name}
                           fill
                           style={{ objectFit: 'cover' }}

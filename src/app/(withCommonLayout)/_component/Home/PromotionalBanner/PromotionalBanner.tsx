@@ -14,7 +14,7 @@ const BannerContainer = styled(Container)(({ theme }) => ({
 
 const BannerImage = styled("img")(({ theme }) => ({
   width: "100%",
-  height: "300px", // Fixed height for landscape size
+  height: "300px", // Default height
   objectFit: "cover",
   borderRadius: theme.shape.borderRadius,
   cursor: "pointer",
@@ -22,11 +22,14 @@ const BannerImage = styled("img")(({ theme }) => ({
   "&:hover": {
     transform: "scale(1.01)",
   },
-  [theme.breakpoints.down("md")]: {
-    height: "250px",
-  },
   [theme.breakpoints.down("sm")]: {
+    height: "150px",
+  },
+  [theme.breakpoints.between("sm", "md")]: {
     height: "200px",
+  },
+  [theme.breakpoints.up("md")]: {
+    height: "300px",
   },
 }));
 
@@ -75,7 +78,10 @@ const PromotionalBanner = () => {
           variant="rectangular"
           width="100%"
           height={300}
-          sx={{ borderRadius: 2 }}
+          sx={{
+            borderRadius: 2,
+            height: { xs: 150, sm: 200, md: 300 },
+          }}
         />
       </BannerContainer>
     );
@@ -101,7 +107,7 @@ const PromotionalBanner = () => {
 
   return (
     <BannerContainer
-      maxWidth="lg"
+      maxWidth="xl"
       sx={{
         paddingBottom: { lg: "100px", xs: "50px" },
       }}

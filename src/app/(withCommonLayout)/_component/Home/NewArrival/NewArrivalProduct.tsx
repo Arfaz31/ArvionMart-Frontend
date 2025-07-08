@@ -43,6 +43,7 @@ const NewArrivalProduct = () => {
             sx={{
               fontWeight: 700,
               position: "relative",
+              fontSize: { xs: "h6", sm: "h5", md: "h4" },
             }}
           >
             NEW ARRIVALS

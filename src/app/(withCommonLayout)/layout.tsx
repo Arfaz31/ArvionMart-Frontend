@@ -2,7 +2,6 @@ import { Box } from "@mui/material";
 import Footer from "./_component/Shared/Footer/Footer";
 import Navbar from "./_component/Shared/Navbar/Navbar";
 import MobileNavbar from "./_component/Shared/Navbar/Mobile/MobileNavbar";
-import SearchBar from "./_component/Shared/Navbar/Mobile/SearchBar";
 import FloatingCart from "./_component/FloatingCart/page";
 import FloatingComponent from "./_component/cartDrawer/FloatingComponent";
 import { getServerSession } from "next-auth";
@@ -37,17 +36,6 @@ export default async function HomeLayout({
   return (
     <div>
       <Navbar session={session} />
-      <Box
-        sx={{
-          display: {
-            lg: "none",
-            xs: "block",
-            sm: "none",
-          },
-        }}
-      >
-        <SearchBar />
-      </Box>
       {children}
       <FloatingComponent />
       <FloatingCart initialItems={sampleItems} />
@@ -62,17 +50,7 @@ export default async function HomeLayout({
       >
         <Footer />
       </Box>
-      <Box
-        sx={{
-          display: {
-            lg: "none",
-            xs: "block",
-            sm: "none",
-          },
-        }}
-      >
-        <MobileNavbar />
-      </Box>
+      <MobileNavbar />
     </div>
   );
 }
