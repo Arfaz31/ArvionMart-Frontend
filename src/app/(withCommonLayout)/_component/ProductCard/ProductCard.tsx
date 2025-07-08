@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
-  CardMedia,
+
   CardContent,
   CardActions,
   Typography,
@@ -20,6 +20,7 @@ import {
   ShoppingCart,
   Visibility,
 } from "@mui/icons-material";
+import Image from "next/image";
 
 interface IVariant {
   _id: string;
@@ -158,7 +159,11 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       </Tooltip>
 
       {/* Product image */}
-      <Box sx={{ position: "relative", pt: "100%" }}>
+      <Box sx={{
+        position: "relative",
+        width: "100%",
+        aspectRatio: "4 / 3", // Fixed aspect ratio
+      }}>
         {!imageLoaded && (
           <Skeleton
             variant="rectangular"
@@ -171,21 +176,17 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             }}
           />
         )}
-        <CardMedia
-          component="img"
-          image={primaryImage}
+        <Image
+          src={primaryImage}
           alt={product.productName}
           onLoad={() => setImageLoaded(true)}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
+          fill
+          style={{
             objectFit: "cover",
             transition: "transform 0.5s ease",
             transform: isHovered ? "scale(1.05)" : "scale(1)",
           }}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
 
         {/* Quick View Button - appears on hover */}
@@ -223,7 +224,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       </Box>
 
       {/* Product content */}
-      <CardContent sx={{ flexGrow: 1 }}>
+      <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, sm: 2 } }}>
         <Typography
           variant="subtitle1"
           fontWeight={600}
@@ -232,6 +233,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            fontSize: { xs: "body1", sm: "subtitle1" },
           }}
         >
           {product.productName}
@@ -244,7 +246,11 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         )}
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography variant="h6" fontWeight={700} color="primary.main">
+          <Typography variant="h6" fontWeight={700} color="primary.main"
+            sx={{
+              fontSize: { xs: "h6", sm: "h6" },
+            }}
+          >
             ${discountedPrice.toFixed(2)}
           </Typography>
           {discount > 0 && (

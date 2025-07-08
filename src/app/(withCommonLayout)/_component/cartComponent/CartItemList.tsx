@@ -52,7 +52,7 @@ import {
                     }}
                   >
                     <Image
-                      src={item.product.images[0]}
+                      src={item.product.images[0] || '/file.svg'} // Fallback to a placeholder if image is falsy
                       alt={item.product.name}
                       fill
                       style={{ objectFit: 'contain' }}

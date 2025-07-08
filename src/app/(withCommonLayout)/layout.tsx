@@ -2,31 +2,31 @@ import { Box } from "@mui/material";
 import Footer from "./_component/Shared/Footer/Footer";
 import Navbar from "./_component/Shared/Navbar/Navbar";
 import MobileNavbar from "./_component/Shared/Navbar/Mobile/MobileNavbar";
-import SearchBar from "./_component/Shared/Navbar/Mobile/SearchBar";
-import FloatingCart from "./_component/FloatingCart/page";
-import FloatingComponent from "./_component/cartDrawer/FloatingComponent";
+
+// import FloatingComponent from "./_component/cartDrawer/FloatingComponent";
 import { getServerSession } from "next-auth";
 
 import { CustomSession } from "@/types/session.type";
 import { authOptions } from "@/utils/authOptions";
 
+
 // Sample cart items
-const sampleItems = [
-  {
-    id: 1,
-    name: "Premium Headphones",
-    price: 199.99,
-    quantity: 1,
-    image: "/images/headphones.jpg",
-  },
-  {
-    id: 2,
-    name: "Wireless Mouse",
-    price: 49.99,
-    quantity: 2,
-    image: "/images/mouse.jpg",
-  },
-];
+// const sampleItems = [
+//   {
+//     id: 1,
+//     name: "Premium Headphones",
+//     price: 199.99,
+//     quantity: 1,
+//     image: "/images/headphones.jpg",
+//   },
+//   {
+//     id: 2,
+//     name: "Wireless Mouse",
+//     price: 49.99,
+//     quantity: 2,
+//     image: "/images/mouse.jpg",
+//   },
+// ];
 
 export default async function HomeLayout({
   children,
@@ -34,23 +34,22 @@ export default async function HomeLayout({
   children: React.ReactNode;
 }) {
   const session = (await getServerSession(authOptions)) as CustomSession | null;
+  // const [chatOpen, setChatOpen] = useState(false);
+
+  // const handleOpenChat = () => {
+  //   setChatOpen(true);
+  // };
+
+  // const handleCloseChat = () => {
+  //   setChatOpen(false);
+  // };
+
   return (
     <div>
       <Navbar session={session} />
-      <Box
-        sx={{
-          display: {
-            lg: "none",
-            xs: "block",
-            sm: "none",
-          },
-        }}
-      >
-        <SearchBar />
-      </Box>
       {children}
-      <FloatingComponent />
-      <FloatingCart initialItems={sampleItems} />
+      {/* <FloatingComponent /> */}
+      {/* <FloatingCart initialItems={sampleItems} /> */}
       <Box
         sx={{
           display: {
@@ -62,17 +61,9 @@ export default async function HomeLayout({
       >
         <Footer />
       </Box>
-      <Box
-        sx={{
-          display: {
-            lg: "none",
-            xs: "block",
-            sm: "none",
-          },
-        }}
-      >
-        <MobileNavbar />
-      </Box>
+      <MobileNavbar />
+      {/* <FloatingChatButton onClick={handleOpenChat} />
+      <ShoeChat open={chatOpen} onClose={handleCloseChat} /> */}
     </div>
   );
 }

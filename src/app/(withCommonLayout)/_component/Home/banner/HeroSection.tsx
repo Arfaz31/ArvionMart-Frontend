@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Box,
   Container,
@@ -26,16 +27,18 @@ interface BannerType {
 }
 
 // Enhanced styled components
-const SliderContainer = styled(Box)(() => ({
+const SliderContainer = styled(Box)(({ theme }) => ({
   position: "relative",
   overflow: "hidden",
   width: "100%",
-  height: "500px",
   borderRadius: "16px",
   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
   cursor: "pointer",
-  "@media (max-width: 768px)": {
-    height: "400px",
+  aspectRatio: "16 / 7", // Default aspect ratio for all screens
+  [theme.breakpoints.down("sm")]: {
+    borderRadius: "8px",
+  },
+  [theme.breakpoints.between("sm", "md")]: {
     borderRadius: "12px",
   },
 }));
@@ -53,9 +56,6 @@ const SlideContent = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
   position: "relative",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
 }));
 
 const Indicator = styled(Box, {
@@ -73,12 +73,12 @@ const Indicator = styled(Box, {
   },
 }));
 
-const LoadingSkeleton = styled(Box)(() => ({
+const LoadingSkeleton = styled(Box)(({ theme }) => ({
   width: "100%",
-  height: "500px",
   borderRadius: "16px",
-  "@media (max-width: 768px)": {
-    height: "400px",
+  aspectRatio: "16 / 9", // Default aspect ratio for all screens
+  [theme.breakpoints.between("sm", "md")]: {
+    aspectRatio: "16 / 9", // Maintain for tablets
   },
 }));
 
@@ -197,7 +197,7 @@ const BannerSlider = () => {
       <Box
         sx={{
           display: {
-            xs: "none",
+            xs: "block",
             sm: "block",
             md: "block",
             lg: "block",
@@ -207,7 +207,7 @@ const BannerSlider = () => {
         <Container maxWidth="xl" sx={{ py: 4 }}>
           <Box
             sx={{
-              height: "600px",
+              height: "300px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -215,7 +215,7 @@ const BannerSlider = () => {
               borderRadius: "16px",
             }}
           >
-            <Box sx={{ color: "text.secondary", fontSize: "1.1rem" }}>
+            <Box sx={{ color: "text.secondary", fontSize: { xs: "0.8rem", sm: "1rem" } }}>
               No banners available at the moment
             </Box>
           </Box>
@@ -228,7 +228,7 @@ const BannerSlider = () => {
     <Box
       sx={{
         display: {
-          xs: "none",
+          xs: "block",
           sm: "block",
           md: "block",
           lg: "block",
@@ -246,19 +246,15 @@ const BannerSlider = () => {
             {banners.map((banner, index) => (
               <SlideContent
                 key={banner._id}
-                sx={{
-                  backgroundImage: `url(${banner.image})`,
-                }}
                 onClick={() => handleBannerClick(banner)}
-                role="button"
-                tabIndex={0}
-                aria-label={`Banner ${index + 1}`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    handleBannerClick(banner);
-                  }
-                }}
-              />
+              >
+                <Image
+                  src={banner.image}
+                  alt={`Banner ${index + 1}`}
+                  fill
+                  style={{ objectFit: "cover", borderRadius: "16px" }}
+                />
+              </SlideContent>
             ))}
           </SlideContainer>
 
@@ -267,7 +263,7 @@ const BannerSlider = () => {
             <Box
               sx={{
                 position: "absolute",
-                bottom: "30px",
+                bottom: "10px",
                 left: "50%",
                 transform: "translateX(-50%)",
                 display: "flex",

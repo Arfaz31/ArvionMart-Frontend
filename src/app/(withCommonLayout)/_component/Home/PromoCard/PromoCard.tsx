@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Box,
   Container,
@@ -22,9 +23,9 @@ interface PromoBannerType {
 }
 
 const PromoCardContainer = styled(Container)(({ theme }) => ({
-  padding: theme.spacing(4, 0),
+  padding: theme.spacing(4, 2),
   [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(2, 0),
+    padding: theme.spacing(2, 1),
   },
 }));
 
@@ -35,23 +36,25 @@ const PromoCardItem = styled(Box)(({ theme }) => ({
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   cursor: "pointer",
   height: "100%",
+  margin: theme.spacing(1), // Add margin to create space from borders
   "&:hover": {
     transform: "translateY(-5px)",
-    boxShadow: theme.shadows[6],
+    boxShadow: theme.shadows[2],
   },
 }));
 
-const PromoImage = styled("img")({
+const PromoImage = styled(Box)(() => ({
   width: "100%",
-  height: "100%",
-  objectFit: "cover",
-  display: "block",
-});
+  borderRadius:"12px",
+  position: "relative",
+  aspectRatio: "4 / 4", // Fixed aspect ratio
+  overflow: "hidden", // Ensure the image respects the border radius
+}));
 
 const LoadingSkeleton = () => (
-  <Grid container spacing={3}>
+  <Grid container spacing={2}>
     {[1, 2, 3, 4].map((item) => (
-      <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
+      <Grid size={{ xs: 6, sm: 6, md: 3 }} key={item}>
         <Skeleton
           variant="rectangular"
           width="100%"
@@ -92,7 +95,7 @@ const PromoCardPage = () => {
 
   if (isLoading) {
     return (
-      <PromoCardContainer maxWidth="lg">
+      <PromoCardContainer maxWidth="xl">
         <LoadingSkeleton />
       </PromoCardContainer>
     );
@@ -100,7 +103,7 @@ const PromoCardPage = () => {
 
   if (error || !promoBanners.length) {
     return (
-      <PromoCardContainer maxWidth="lg">
+      <PromoCardContainer maxWidth="xl">
         <Box
           textAlign="center"
           py={10}
@@ -117,28 +120,35 @@ const PromoCardPage = () => {
   }
 
   return (
-    <PromoCardContainer maxWidth="lg">
+    <PromoCardContainer maxWidth="xl">
       <Typography
-        variant="h4"
+        variant="h5"
         gutterBottom
         sx={{
-          marginBottom: 4,
-          marginTop: 5,
+          marginBottom: 2,
+          marginTop: 0,
           textAlign: "center",
           fontWeight: 700,
+          [theme.breakpoints.down("sm")]: {
+            fontSize: "1.5rem",
+          },
         }}
       >
         Best Deals
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         {promoBanners.map((banner) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={banner._id}>
+          <Grid size={{ xs: 6, sm: 6, md: 3 }} key={banner._id}>
             <PromoCardItem onClick={() => handleCardClick(banner)}>
-              <PromoImage
-                src={banner.bannerImage}
-                alt="Promotional banner"
-                loading="lazy"
-              />
+              <PromoImage>
+                <Image
+                  src={banner.bannerImage}
+                  alt="Promotional banner"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              </PromoImage>
             </PromoCardItem>
           </Grid>
         ))}

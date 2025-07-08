@@ -36,6 +36,7 @@ import {
   EmojiEmotionsOutlined,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import Image from 'next/image';
 
 // Styled components with responsive adjustments
 const ChatContainer = styled(Box)(({ theme }) => ({
@@ -438,7 +439,7 @@ const ShoeChat = ({ open, onClose }: { open: boolean; onClose: () => void }) => 
               <ProductCard key={product.id}>
                 <Box sx={{ display: 'flex', p: 1 }}>
                   <Box sx={{ mr: 1 }}>
-                    <img 
+                    <Image
                       src={product.image} 
                       alt={product.name} 
                       width={isMobile ? 80 : 100} 

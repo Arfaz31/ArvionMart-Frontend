@@ -95,13 +95,14 @@ const Gallery: React.FC = () => {
       {" "}
       <Box sx={{ py: 6 }}>
         <Typography
-          variant="h4"
+          variant="h5"
           component="h2"
           align="center"
           sx={{
             mb: 4,
             fontWeight: "bold",
             position: "relative",
+            fontSize: { xs: "h6", sm: "h5" },
             "&::after": {
               content: '""',
               position: "absolute",
@@ -123,7 +124,7 @@ const Gallery: React.FC = () => {
                 onClick={() => openLightbox(index)}
                 sx={{
                   position: "relative",
-                  height: { xs: "300px", md: "630px" },
+                  aspectRatio: "4 / 3", // Fixed aspect ratio
                   overflow: "hidden",
                   borderRadius: "0px",
                   boxShadow: "0 4px 8px rgba(0,0,0,0.1)",

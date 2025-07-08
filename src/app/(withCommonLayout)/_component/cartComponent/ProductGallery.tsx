@@ -24,7 +24,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         bgcolor: 'background.paper'
       }}>
         <Image
-          src={mainImage}
+          src={mainImage || '/file.svg'} // Fallback to a placeholder if mainImage is falsy
           alt={product.name}
           width={400}
           height={400}
@@ -56,7 +56,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               onClick={() => setMainImage(image)}
             >
               <Image
-                src={image}
+                src={image || '/file.svg'} // Fallback to a placeholder if image is falsy
                 alt={`${product.name} - view ${index + 1}`}
                 width={70}
                 height={70}

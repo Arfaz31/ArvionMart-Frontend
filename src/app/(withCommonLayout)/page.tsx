@@ -19,19 +19,19 @@ export default function Home() {
     <Box
       component="main"
       sx={{
+
         bgcolor: "#fafafa",
       }}
     >
       <HeroSection />
       <PromoCard />
-      {/* <HeroFromMobile /> */}
       <Category />
       <BrandOffer />
       <FeatureProduct />
       <PromotionalBanner />
       <NewArrivalProduct />
 
-      {/* <Gallery /> */}
+    
     </Box>
   );
 }

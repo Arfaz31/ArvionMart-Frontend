@@ -1,74 +1,94 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
 import { Box, Container, Typography } from "@mui/material";
 import LoadingForCategory from "./LoadingForCategory";
 import Image from "next/image";
 
+interface ICategory {
+  _id: string;
+  categoryName: string;
+  imageUrl: string;
+}
+
 const Category = () => {
-  const { data: category, isLoading } = useGetCategoriesQuery("");
+  const { data: category, isLoading, error } = useGetCategoriesQuery("");
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("Fetched Categories:", category);
+  }
 
   return (
     <Box
       sx={{
-        marginTop: { lg: "100px", xs: "50px" },
-        paddingBottom: { lg: "100px", xs: "150px" },
+        marginTop: { lg: "10px", xs: "15px" },
+        paddingBottom: { lg: "50px", xs: "50px" },
       }}
     >
       <Container>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: "40px",
-          }}
-        >
-          <Typography
-            variant="h4"
-            component="h2"
+        <Box>
+          <Box
             sx={{
-              fontWeight: 700,
-              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "10px",
             }}
           >
-            Shop By Categories
-          </Typography>
-        </Box>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{
+                fontWeight: 700,
+                position: "relative",
+                fontSize: { xs: "h6", sm: "h5", md: "h4" },
+              }}
+            >
+              Shop By Categories
+            </Typography>
+          </Box>
 
-        {isLoading ? (
-          <LoadingForCategory />
-        ) : (
-          <Box>
+          {isLoading ? (
+            <LoadingForCategory />
+          ) : error || !category?.data?.length ? (
+            <Box
+              textAlign="center"
+              py={4}
+              color="text.secondary"
+              sx={{
+                backgroundColor: "#f5f5f5",
+                borderRadius: "12px",
+              }}
+            >
+              No categories available
+            </Box>
+          ) : (
             <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: {
-                  lg: "repeat(3, 1fr)",
+                  lg: "repeat(4, 1fr)",
                   xs: "repeat(2, 1fr)",
                 },
                 gap: { lg: 4, xs: 2 },
               }}
             >
-              {category?.data?.slice(0, 6)?.map((categoryData: any) => (
+              {category.data.slice(0, 6).map((categoryData: ICategory, index: number) => (
                 <Box
-                  key={categoryData._id}
+                  key={categoryData._id || index}
                   sx={{
                     position: "relative",
+                    // height: "200px", // Removed fixed height
+                    aspectRatio: "4 / 3", // Fixed aspect ratio
                     overflow: "hidden",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    height: { lg: "250px", xs: "200px" },
-                    "&:hover img": {
-                      transform: "scale(1.1)",
-                      transition: "transform 0.3s ease",
-                    },
-                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
                   }}
                 >
                   <Image
-                    src={categoryData.imageUrl}
-                    alt={categoryData.categoryName}
+                    src={categoryData.imageUrl || "/placeholder.jpg"}
+                    alt={categoryData.categoryName || "Category"}
                     fill
                     style={{
                       objectFit: "cover",
@@ -97,14 +117,14 @@ const Category = () => {
                         lineHeight: 1.2,
                       }}
                     >
-                      {categoryData.categoryName}
+                      {categoryData.categoryName || "Category"}
                     </Typography>
                   </Box>
                 </Box>
               ))}
             </Box>
-          </Box>
-        )}
+          )}
+        </Box>
       </Container>
     </Box>
   );

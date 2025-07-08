@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import logo from "@/assests/logo/LogoAnimated.gif";
 import Image from "next/image";
 
+
 type UserProps = {
   user?: {
     _id?: string | null | undefined;
@@ -100,16 +101,85 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
   ];
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        display: {
-          xs: "none",
-          sm: "block",
-          lg: "block",
-        },
-      }}
-    >
+    <Box sx={{ flexGrow: 1, position:"relative" }}>
+      {/* Responsive AppBar */}
+      <AppBar
+        position="fixed"
+        elevation={0}
+        color="default"
+        sx={{
+          display: { xs: "block", sm: "none" },
+          bgcolor: "white",
+          color: "#333",
+          borderBottom: "1px solid #e0e0e0",
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar
+            disableGutters
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              py: 1,
+            }}
+          >
+            <Link
+              href="/"
+              underline="none"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                height: "48px",
+              }}
+            >
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "120px",
+                  height: "50px",
+                }}
+              >
+                <Image
+                  src={logo}
+                  alt="Arvion Mart Logo"
+                  layout="fill"
+                  objectFit="contain"
+                  priority
+                />
+              </Box>
+            </Link>
+            <Box
+              sx={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                border: "1px solid #e5e7eb",
+                borderRadius: "8px",
+                backgroundColor: "#ffffff",
+                flexGrow: 1,
+                ml: 2,
+              }}
+            >
+              <InputBase
+                placeholder="Search..."
+                sx={{
+                  ml: 2,
+                  flex: 1,
+                  fontSize: "0.875rem",
+                }}
+              />
+              <IconButton type="button" aria-label="search" sx={{ p: "8px" }}>
+                <SearchIcon sx={{ fontSize: "1.1rem" }} />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
+      <Toolbar sx={{ display: { xs: "block", sm: "none" } }} />
+
+      {/* Desktop Navigation */}
+      <Box sx={{ display: { xs: "none", sm: "block" } }}>
       {/* Top notification bar */}
       <AppBar
         position="static"
@@ -240,7 +310,7 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
 
       {/* Main navigation */}
       <AppBar
-        position="static"
+        position="sticky"
         elevation={0}
         color="default"
         sx={{
@@ -312,7 +382,7 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
                 gap: 2,
               }}
             >
-              <Link href="/" style={{ textDecoration: "none" }}>
+              <Link href="/all-products" style={{ textDecoration: "none" }}>
                 <Button
                   sx={{
                     color: "#333",
@@ -322,7 +392,7 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
                   }}
                   variant="text"
                 >
-                  Home
+                  All Products
                 </Button>
               </Link>
 
@@ -339,6 +409,34 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
                   variant="text"
                 >
                   All Brands
+                </Button>
+              </Link>
+
+              <Link href="/about" style={{ textDecoration: "none" }}>
+                <Button
+                  sx={{
+                    color: "#333",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    "&:hover": { bgcolor: "transparent", color: "#666" },
+                  }}
+                  variant="text"
+                >
+                  About Us
+                </Button>
+              </Link>
+
+              <Link href="/contact" style={{ textDecoration: "none" }}>
+                <Button
+                  sx={{
+                    color: "#333",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    "&:hover": { bgcolor: "transparent", color: "#666" },
+                  }}
+                  variant="text"
+                >
+                  Contact Us
                 </Button>
               </Link>
 
@@ -458,6 +556,7 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
         </Container>
       </AppBar>
     </Box>
+     </Box>
   );
 };
 

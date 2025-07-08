@@ -4,8 +4,8 @@ const ProductCardSkeleton = () => {
   return (
     <Box
       sx={{
-        width: 250,
-        padding: 2,
+        width: "100%",
+        padding: { xs: 1.5, sm: 2 },
         border: "1px solid #e0e0e0",
         borderRadius: 2,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
@@ -24,7 +24,7 @@ const ProductCardSkeleton = () => {
       />
 
       {/* Image placeholder */}
-      <Skeleton variant="rectangular" width={200} height={150} />
+      <Skeleton variant="rectangular" width="100%" height={{ xs: 150, sm: 200 }} />
 
       {/* Product title */}
       <Skeleton variant="text" width="80%" height={25} />
