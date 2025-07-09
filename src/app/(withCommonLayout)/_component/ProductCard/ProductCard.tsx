@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 import {
   Card,
   CardContent,
@@ -13,8 +14,15 @@ import {
   Skeleton,
   Tooltip,
 } from "@mui/material";
-import { Favorite, FavoriteBorder, ShoppingCart } from "@mui/icons-material";
+import {
+  Favorite,
+  FavoriteBorder,
+  ShoppingCart,
+  Visibility,
+} from "@mui/icons-material";
 import Image from "next/image";
+import { addProductToWishList } from "@/redux/features/wishList/wishListSlice";
+import { addToCart } from "@/redux/features/cart/cartSlice";
 
 interface IVariant {
   _id: string;
@@ -55,6 +63,7 @@ interface IProduct {
 
 const ProductCard = ({ product }: { product: IProduct }) => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -63,15 +72,50 @@ const ProductCard = ({ product }: { product: IProduct }) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFavorite(!isFavorite);
+
+    // Dispatch to wishlist
+    if (!isFavorite) {
+      dispatch(
+        addProductToWishList({
+          productId: product._id,
+          productName: product.productName,
+          sku: primaryVariant._id,
+          brandName: product.brand?.brandName || "",
+          sellingPrice: primaryVariant.sellingPrice,
+          discount: primaryVariant.discount,
+          image: primaryImage,
+        })
+      );
+    }
   };
 
   const handleProductClick = () => {
     router.push(`/product/${product._id}`);
   };
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/product/${product._id}`);
+  };
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Add to cart logic here
+
+    // Dispatch to cart
+    dispatch(
+      addToCart({
+        productId: product._id,
+        productSKU: primaryVariant._id,
+        productName: product.productName,
+        category: product.category?.categoryName || "",
+        brand: product.brand?.brandName,
+        discount: primaryVariant.discount,
+        purchasePrice: primaryVariant.sellingPrice,
+        sellingPrice: primaryVariant.sellingPrice,
+        variant: primaryVariant._id,
+        quantity: 1,
+      })
+    );
   };
 
   const primaryVariant: IVariant = product.variant?.[0] || DEFAULT_VARIANT;
@@ -89,18 +133,55 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         flexDirection: "column",
         position: "relative",
         transition: "all 0.3s ease",
-        borderRadius: 2,
+        borderRadius: { xs: 1, sm: 2 },
         overflow: "hidden",
         cursor: "pointer",
         "&:hover": {
-          transform: "translateY(-5px)",
+          transform: { xs: "none", sm: "translateY(-5px)" },
         },
       }}
-      onClick={handleProductClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Badges */}
+      {/* Top badges - Discount and New */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: { xs: 4, sm: 8 },
+          left: { xs: 4, sm: 8 },
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+        }}
+      >
+        {discount > 0 && (
+          <Chip
+            label={`-${discount}%`}
+            size="small"
+            sx={{
+              backgroundColor: "#1565c0",
+              color: "white",
+              fontWeight: 600,
+              fontSize: { xs: "10px", sm: "12px" },
+              height: { xs: "20px", sm: "24px" },
+            }}
+          />
+        )}
+        {product.isNewArrival && (
+          <Chip
+            label="New"
+            size="small"
+            sx={{
+              backgroundColor: "#4dabf7",
+              color: "white",
+              fontWeight: 600,
+              fontSize: { xs: "10px", sm: "12px" },
+              height: { xs: "20px", sm: "24px" },
+            }}
+          />
+        )}
+      </Box>
 
       {/* Favorite button */}
       <Tooltip title={isFavorite ? "Remove from wishlist" : "Add to wishlist"}>
@@ -109,19 +190,26 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           onClick={handleFavoriteClick}
           sx={{
             position: "absolute",
-            top: 8,
-            right: 8,
-            zIndex: 1,
-            backgroundColor: "#fe9452",
+            top: { xs: 4, sm: 8 },
+            right: { xs: 4, sm: 8 },
+            zIndex: 2,
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            width: { xs: "28px", sm: "32px" },
+            height: { xs: "28px", sm: "32px" },
             "&:hover": {
-              backgroundColor: "#fe9452",
+              backgroundColor: "rgba(255, 255, 255, 1)",
             },
           }}
         >
           {isFavorite ? (
-            <Favorite color="error" fontSize="small" />
+            <Favorite
+              color="error"
+              sx={{ fontSize: { xs: "16px", sm: "20px" } }}
+            />
           ) : (
-            <FavoriteBorder fontSize="small" sx={{ color: "white" }} />
+            <FavoriteBorder
+              sx={{ color: "#666", fontSize: { xs: "16px", sm: "20px" } }}
+            />
           )}
         </IconButton>
       </Tooltip>
@@ -131,10 +219,11 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         sx={{
           position: "relative",
           width: "100%",
-          bgcolor: "red",
-          aspectRatio: "4 / 4",
-          padding: "5px", // Fixed aspect ratio
+          aspectRatio: "1 / 1",
+          padding: { xs: "3px", sm: "5px" },
+          cursor: "pointer",
         }}
+        onClick={handleProductClick}
       >
         {!imageLoaded && (
           <Skeleton
@@ -145,6 +234,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
               position: "absolute",
               top: 0,
               left: 0,
+              borderRadius: 1,
             }}
           />
         )}
@@ -157,108 +247,160 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             objectFit: "contain",
             transition: "transform 0.5s ease",
             transform: isHovered ? "scale(1.05)" : "scale(1)",
+            borderRadius: "4px",
           }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
+
+        {/* View Details button - shows on hover and hidden on mobile */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: { xs: 8, sm: 16 },
+            left: "50%",
+            transform: "translateX(-50%)",
+            opacity: isHovered ? 1 : 0,
+            transition: "opacity 0.3s ease",
+            display: { xs: "none", sm: "block" },
+          }}
+        >
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Visibility />}
+            onClick={handleViewDetails}
+            sx={{
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              color: "#333",
+              fontWeight: 600,
+              borderRadius: 1,
+              fontSize: "12px",
+              padding: "4px 8px",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 1)",
+              },
+            }}
+          >
+            View Details
+          </Button>
+        </Box>
       </Box>
 
       {/* Product content */}
-      <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, sm: 2 } }}>
+      <CardContent
+        sx={{ flexGrow: 1, p: { xs: 1, sm: 2 }, pb: { xs: 1, sm: 2 } }}
+      >
         <Typography
           variant="subtitle1"
-          fontWeight={400}
+          fontWeight={500}
           sx={{
-            mb: 1,
+            mb: { xs: 0.5, sm: 1 },
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            fontSize: { xs: "h6", sm: "18px" },
+            fontSize: { xs: "13px", sm: "16px" },
+            lineHeight: { xs: 1.2, sm: 1.4 },
+            cursor: "pointer",
+            "&:hover": {
+              textDecoration: "underline",
+            },
           }}
+          onClick={handleProductClick}
         >
           {product.productName}
         </Typography>
+
+        {/* Brand name */}
+        {product.brand && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: { xs: 0.5, sm: 1 },
+              fontSize: { xs: "11px", sm: "12px" },
+              lineHeight: 1.2,
+            }}
+          >
+            {product.brand.brandName}
+          </Typography>
+        )}
 
         <Box
           sx={{
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
-            gap: 1,
-            mb: 1,
+            gap: { xs: 0.5, sm: 1 },
+            mb: { xs: 0.5, sm: 1 },
           }}
         >
           <Typography
             variant="h6"
-            fontWeight={400}
+            fontWeight={600}
             color="primary.main"
             sx={{
-              fontSize: { xs: "16px", sm: "14px" },
+              fontSize: { xs: "14px", sm: "18px" },
+              lineHeight: 1.2,
             }}
           >
             ৳{discountedPrice.toFixed(2)}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {product.stock <= 0 && (
-              <Chip
-                label="Out of Stock"
-                color="error"
-                size="small"
-                sx={{ fontWeight: 600 }}
-              />
-            )}
-            <Box
-              sx={{
-                bgcolor: "#fe9452",
 
-                borderRadius: 1,
-              }}
-            >
-              {discount > 0 && (
-                <Typography sx={{ fontSize: "14px", color: "#fff" }}>
-                  -{discount}%
-                </Typography>
-              )}
-            </Box>
-          </Box>
           {discount > 0 && (
             <Typography
               variant="body2"
               color="text.disabled"
-              sx={{ textDecoration: "line-through" }}
+              sx={{
+                textDecoration: "line-through",
+                fontSize: { xs: "12px", sm: "14px" },
+                lineHeight: 1.2,
+              }}
             >
               ৳{sellingPrice.toFixed(2)}
             </Typography>
           )}
         </Box>
+
+        {product.stock <= 0 && (
+          <Chip
+            label="Out of Stock"
+            color="error"
+            size="small"
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: "10px", sm: "12px" },
+              height: { xs: "20px", sm: "24px" },
+            }}
+          />
+        )}
       </CardContent>
 
-      {/* Add to cart button */}
+      {/* Add to cart button - Hidden on mobile */}
       <CardActions
         sx={{
-          p: 2,
+          p: { xs: 1, sm: 2 },
           pt: 0,
-          display: {
-            lg: "block",
-            md: "block",
-            sm: "none",
-            xs: "none",
-          },
+          display: { xs: "none", sm: "block" },
         }}
       >
         <Button
           fullWidth
           variant="contained"
           startIcon={<ShoppingCart />}
-          size="small"
-          disabled={product.stock <= 0}
+          size="medium"
+          disabled={product.stock < 1}
           onClick={handleAddToCart}
           sx={{
             fontWeight: 600,
             borderRadius: 1,
-            justifyContent: 'center',
+            justifyContent: "center",
+            backgroundColor: product.stock < 1 ? "#ccc" : "#1976d2",
+            "&:hover": {
+              backgroundColor: product.stock < 1 ? "#ccc" : "#1565c0",
+            },
           }}
         >
-          {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
+          {product.stock < 1 ? "Out of Stock" : "Add to Cart"}
         </Button>
       </CardActions>
     </Card>

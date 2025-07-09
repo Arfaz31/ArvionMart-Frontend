@@ -1,17 +1,16 @@
-// src/pages/products/[id].tsx
-import { notFound } from 'next/navigation';
+import { notFound } from "next/navigation";
 
-import { Container, Grid, Box } from '@mui/material';
-import ProductTabs from '../../_component/ProductsTabs/page';
-import ProductInfo from '../../_component/ProductInfo/page';
-import ProductGallery from '../../_component/ProductGallery/page';
-import { getProduct } from '@/app/productApi';
+import { Container, Grid, Box } from "@mui/material";
+import { getSingleProduct } from "@/Services/ProductServices/GetSingleProduct";
 
+export default async function ProductPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { data: product } = await getSingleProduct(params.id);
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const products = await getProduct(params.id);
-
-  if (!products) {
+  if (!product) {
     return notFound();
   }
 
@@ -19,20 +18,18 @@ export default async function ProductPage({ params }: { params: { id: string } }
     <Container maxWidth="xl" sx={{ py: 6 }}>
       <Grid container spacing={4}>
         {/* Product Gallery */}
-        <Grid size={{xs: 12, md: 6}}>
-          <ProductGallery product={products} />
+        <Grid size={{ xs: 12, md: 6 }}>
+          {/* <ProductGallery product={product} /> */}
         </Grid>
 
         {/* Product Details */}
-        <Grid size={{xs: 12, md: 4}}>
-          <ProductInfo product={products} />
+        <Grid size={{ xs: 12, md: 4 }}>
+          {/* <ProductInfo product={product} /> */}
         </Grid>
       </Grid>
 
       {/* Tabbed Product Information */}
-      <Box mt={8}>
-        <ProductTabs product={products} />
-      </Box>
+      <Box mt={8}>{/* <ProductTabs product={product} /> */}</Box>
     </Container>
   );
 }
