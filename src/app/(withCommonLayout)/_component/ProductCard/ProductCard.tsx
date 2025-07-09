@@ -394,9 +394,10 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             fontWeight: 600,
             borderRadius: 1,
             justifyContent: "center",
-            backgroundColor: product.stock < 1 ? "#ccc" : "#1976d2",
+            background: "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
             "&:hover": {
-              backgroundColor: product.stock < 1 ? "#ccc" : "#1565c0",
+              background: "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
+              boxShadow: "0 4px 12px rgba(86, 72, 214, 0.3)",
             },
           }}
         >
