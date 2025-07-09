@@ -55,7 +55,7 @@ const FeatureProduct = () => {
         {isLoading ? (
           <Grid container spacing={4} columns={12}>
             {Array.from({ length: 8 }).map((_, index) => (
-              <Grid key={index} size={{xs:6, sm:6,md:6,lg:4 ,xl:3}} >
+              <Grid key={index} size={{ xs: 6, sm: 6, md: 6, lg: 4, xl: 3 }}>
                 <ProductCardSkeleton />
               </Grid>
             ))}
@@ -70,14 +70,14 @@ const FeatureProduct = () => {
           </Typography>
         ) : (
           <>
-            <Grid container spacing={4} columns={12}>
+            <Grid container spacing={2} columns={12}>
               {products
-                .filter(
-                  (product: any) =>
-                    product?.variant?.[0]?.image?.[0]
-                )
+                .filter((product: any) => product?.variant?.[0]?.image?.[0])
                 .map((product: any) => (
-                  <Grid  key={product._id} size={{xs:6, sm:6,md:6,lg:4 ,xl:3}} >
+                  <Grid
+                    key={product._id}
+                    size={{ xs: 6, sm: 6, md: 6, lg: 4, xl: 3 }}
+                  >
                     <ProductCard product={product} />
                   </Grid>
                 ))}

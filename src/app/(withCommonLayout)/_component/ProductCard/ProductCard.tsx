@@ -101,30 +101,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Badges */}
-      <Box sx={{ position: "absolute", top: 8, left: 8, zIndex: 1 }}>
-        {product.isNewArrival && (
-          <Chip
-            label="New"
-            size="small"
-            sx={{ fontWeight: 600, mr: 1, backgroundColor: "#fe9452" }}
-          />
-        )}
-        {product.stock <= 0 && (
-          <Chip
-            label="Out of Stock"
-            color="error"
-            size="small"
-            sx={{ fontWeight: 600 }}
-          />
-        )}
-        {discount > 0 && (
-          <Chip
-            label={`${discount}% OFF`}
-            size="small"
-            sx={{ fontWeight: 600, backgroundColor: "#fe9452", color: "white" }}
-          />
-        )}
-      </Box>
 
       {/* Favorite button */}
       <Tooltip title={isFavorite ? "Remove from wishlist" : "Add to wishlist"}>
@@ -136,16 +112,16 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             top: 8,
             right: 8,
             zIndex: 1,
-            backgroundColor: "background.paper",
+            backgroundColor: "#fe9452",
             "&:hover": {
-              backgroundColor: "background.paper",
+              backgroundColor: "#fe9452",
             },
           }}
         >
           {isFavorite ? (
             <Favorite color="error" fontSize="small" />
           ) : (
-            <FavoriteBorder fontSize="small" />
+            <FavoriteBorder fontSize="small" sx={{ color: "white" }} />
           )}
         </IconButton>
       </Tooltip>
@@ -155,7 +131,9 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         sx={{
           position: "relative",
           width: "100%",
-          aspectRatio: "4 / 3", // Fixed aspect ratio
+          bgcolor: "red",
+          aspectRatio: "4 / 4",
+          padding: "5px", // Fixed aspect ratio
         }}
       >
         {!imageLoaded && (
@@ -176,7 +154,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           onLoad={() => setImageLoaded(true)}
           fill
           style={{
-            objectFit: "cover",
+            objectFit: "contain",
             transition: "transform 0.5s ease",
             transform: isHovered ? "scale(1.05)" : "scale(1)",
           }}
@@ -200,30 +178,55 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           {product.productName}
         </Typography>
 
-        {product.brand && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {product.brand.brandName}
-          </Typography>
-        )}
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 1,
+            mb: 1,
+          }}
+        >
           <Typography
             variant="h6"
-            fontWeight={700}
+            fontWeight={400}
             color="primary.main"
             sx={{
-              fontSize: { xs: "h6", sm: "h6" },
+              fontSize: { xs: "16px", sm: "14px" },
             }}
           >
-            ${discountedPrice.toFixed(2)}
+            ৳{discountedPrice.toFixed(2)}
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {product.stock <= 0 && (
+              <Chip
+                label="Out of Stock"
+                color="error"
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+            <Box
+              sx={{
+                bgcolor: "#fe9452",
+
+                borderRadius: 1,
+              }}
+            >
+              {discount > 0 && (
+                <Typography sx={{ fontSize: "14px", color: "#fff" }}>
+                  -{discount}%
+                </Typography>
+              )}
+            </Box>
+          </Box>
           {discount > 0 && (
             <Typography
               variant="body2"
               color="text.disabled"
               sx={{ textDecoration: "line-through" }}
             >
-              ${sellingPrice.toFixed(2)}
+              ৳{sellingPrice.toFixed(2)}
             </Typography>
           )}
         </Box>
@@ -252,6 +255,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           sx={{
             fontWeight: 600,
             borderRadius: 1,
+            justifyContent: 'center',
           }}
         >
           {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
