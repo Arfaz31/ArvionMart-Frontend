@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
-
   CardContent,
   CardActions,
   Typography,
@@ -14,12 +13,7 @@ import {
   Skeleton,
   Tooltip,
 } from "@mui/material";
-import {
-  Favorite,
-  FavoriteBorder,
-  ShoppingCart,
-  Visibility,
-} from "@mui/icons-material";
+import { Favorite, FavoriteBorder, ShoppingCart } from "@mui/icons-material";
 import Image from "next/image";
 
 interface IVariant {
@@ -111,9 +105,8 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         {product.isNewArrival && (
           <Chip
             label="New"
-            color="primary"
             size="small"
-            sx={{ fontWeight: 600, mr: 1 }}
+            sx={{ fontWeight: 600, mr: 1, backgroundColor: "#fe9452" }}
           />
         )}
         {product.stock <= 0 && (
@@ -127,9 +120,8 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         {discount > 0 && (
           <Chip
             label={`${discount}% OFF`}
-            color="secondary"
             size="small"
-            sx={{ fontWeight: 600 }}
+            sx={{ fontWeight: 600, backgroundColor: "#fe9452", color: "white" }}
           />
         )}
       </Box>
@@ -159,11 +151,13 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       </Tooltip>
 
       {/* Product image */}
-      <Box sx={{
-        position: "relative",
-        width: "100%",
-        aspectRatio: "4 / 3", // Fixed aspect ratio
-      }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "4 / 3", // Fixed aspect ratio
+        }}
+      >
         {!imageLoaded && (
           <Skeleton
             variant="rectangular"
@@ -188,52 +182,19 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-
-        {/* Quick View Button - appears on hover */}
-        {isHovered && (
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 16,
-              left: 0,
-              right: 0,
-              display: "flex",
-              justifyContent: "center",
-              opacity: isHovered ? 1 : 0,
-              transition: "opacity 0.3s ease",
-            }}
-          >
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<Visibility fontSize="small" />}
-              sx={{
-                backgroundColor: "background.paper",
-                color: "text.primary",
-                fontWeight: 600,
-                boxShadow: 2,
-                "&:hover": {
-                  backgroundColor: "background.paper",
-                },
-              }}
-            >
-              Quick View
-            </Button>
-          </Box>
-        )}
       </Box>
 
       {/* Product content */}
       <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, sm: 2 } }}>
         <Typography
           variant="subtitle1"
-          fontWeight={600}
+          fontWeight={400}
           sx={{
             mb: 1,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            fontSize: { xs: "body1", sm: "subtitle1" },
+            fontSize: { xs: "h6", sm: "18px" },
           }}
         >
           {product.productName}
@@ -246,7 +207,10 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         )}
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography variant="h6" fontWeight={700} color="primary.main"
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            color="primary.main"
             sx={{
               fontSize: { xs: "h6", sm: "h6" },
             }}
@@ -266,7 +230,18 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       </CardContent>
 
       {/* Add to cart button */}
-      <CardActions sx={{ p: 2, pt: 0 }}>
+      <CardActions
+        sx={{
+          p: 2,
+          pt: 0,
+          display: {
+            lg: "block",
+            md: "block",
+            sm: "none",
+            xs: "none",
+          },
+        }}
+      >
         <Button
           fullWidth
           variant="contained"
