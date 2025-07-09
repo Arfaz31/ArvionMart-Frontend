@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
-
   CardContent,
   CardActions,
   Typography,
@@ -14,12 +13,7 @@ import {
   Skeleton,
   Tooltip,
 } from "@mui/material";
-import {
-  Favorite,
-  FavoriteBorder,
-  ShoppingCart,
-  Visibility,
-} from "@mui/icons-material";
+import { Favorite, FavoriteBorder, ShoppingCart } from "@mui/icons-material";
 import Image from "next/image";
 
 interface IVariant {
@@ -107,32 +101,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Badges */}
-      <Box sx={{ position: "absolute", top: 8, left: 8, zIndex: 1 }}>
-        {product.isNewArrival && (
-          <Chip
-            label="New"
-            color="primary"
-            size="small"
-            sx={{ fontWeight: 600, mr: 1 }}
-          />
-        )}
-        {product.stock <= 0 && (
-          <Chip
-            label="Out of Stock"
-            color="error"
-            size="small"
-            sx={{ fontWeight: 600 }}
-          />
-        )}
-        {discount > 0 && (
-          <Chip
-            label={`${discount}% OFF`}
-            color="secondary"
-            size="small"
-            sx={{ fontWeight: 600 }}
-          />
-        )}
-      </Box>
 
       {/* Favorite button */}
       <Tooltip title={isFavorite ? "Remove from wishlist" : "Add to wishlist"}>
@@ -144,26 +112,30 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             top: 8,
             right: 8,
             zIndex: 1,
-            backgroundColor: "background.paper",
+            backgroundColor: "#fe9452",
             "&:hover": {
-              backgroundColor: "background.paper",
+              backgroundColor: "#fe9452",
             },
           }}
         >
           {isFavorite ? (
             <Favorite color="error" fontSize="small" />
           ) : (
-            <FavoriteBorder fontSize="small" />
+            <FavoriteBorder fontSize="small" sx={{ color: "white" }} />
           )}
         </IconButton>
       </Tooltip>
 
       {/* Product image */}
-      <Box sx={{
-        position: "relative",
-        width: "100%",
-        aspectRatio: "4 / 3", // Fixed aspect ratio
-      }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          bgcolor: "red",
+          aspectRatio: "4 / 4",
+          padding: "5px", // Fixed aspect ratio
+        }}
+      >
         {!imageLoaded && (
           <Skeleton
             variant="rectangular"
@@ -182,91 +154,97 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           onLoad={() => setImageLoaded(true)}
           fill
           style={{
-            objectFit: "cover",
+            objectFit: "contain",
             transition: "transform 0.5s ease",
             transform: isHovered ? "scale(1.05)" : "scale(1)",
           }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-
-        {/* Quick View Button - appears on hover */}
-        {isHovered && (
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 16,
-              left: 0,
-              right: 0,
-              display: "flex",
-              justifyContent: "center",
-              opacity: isHovered ? 1 : 0,
-              transition: "opacity 0.3s ease",
-            }}
-          >
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<Visibility fontSize="small" />}
-              sx={{
-                backgroundColor: "background.paper",
-                color: "text.primary",
-                fontWeight: 600,
-                boxShadow: 2,
-                "&:hover": {
-                  backgroundColor: "background.paper",
-                },
-              }}
-            >
-              Quick View
-            </Button>
-          </Box>
-        )}
       </Box>
 
       {/* Product content */}
       <CardContent sx={{ flexGrow: 1, p: { xs: 1.5, sm: 2 } }}>
         <Typography
           variant="subtitle1"
-          fontWeight={600}
+          fontWeight={400}
           sx={{
             mb: 1,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            fontSize: { xs: "body1", sm: "subtitle1" },
+            fontSize: { xs: "h6", sm: "18px" },
           }}
         >
           {product.productName}
         </Typography>
 
-        {product.brand && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {product.brand.brandName}
-          </Typography>
-        )}
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography variant="h6" fontWeight={700} color="primary.main"
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 1,
+            mb: 1,
+          }}
+        >
+          <Typography
+            variant="h6"
+            fontWeight={400}
+            color="primary.main"
             sx={{
-              fontSize: { xs: "h6", sm: "h6" },
+              fontSize: { xs: "16px", sm: "14px" },
             }}
           >
-            ${discountedPrice.toFixed(2)}
+            ৳{discountedPrice.toFixed(2)}
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {product.stock <= 0 && (
+              <Chip
+                label="Out of Stock"
+                color="error"
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+            <Box
+              sx={{
+                bgcolor: "#fe9452",
+
+                borderRadius: 1,
+              }}
+            >
+              {discount > 0 && (
+                <Typography sx={{ fontSize: "14px", color: "#fff" }}>
+                  -{discount}%
+                </Typography>
+              )}
+            </Box>
+          </Box>
           {discount > 0 && (
             <Typography
               variant="body2"
               color="text.disabled"
               sx={{ textDecoration: "line-through" }}
             >
-              ${sellingPrice.toFixed(2)}
+              ৳{sellingPrice.toFixed(2)}
             </Typography>
           )}
         </Box>
       </CardContent>
 
       {/* Add to cart button */}
-      <CardActions sx={{ p: 2, pt: 0 }}>
+      <CardActions
+        sx={{
+          p: 2,
+          pt: 0,
+          display: {
+            lg: "block",
+            md: "block",
+            sm: "none",
+            xs: "none",
+          },
+        }}
+      >
         <Button
           fullWidth
           variant="contained"
@@ -277,6 +255,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           sx={{
             fontWeight: 600,
             borderRadius: 1,
+            justifyContent: 'center',
           }}
         >
           {product.stock <= 0 ? "Out of Stock" : "Add to Cart"}
