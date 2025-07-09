@@ -1,17 +1,24 @@
-import { Product } from "./product";
-
-
-
-export interface CartItem {
-  id: string;
-  product: Product;
+export type TOrderItem = {
+  productId: string;
+  productSKU: string;
+  productName: string;
+  category: string;
+  brand?: string;
+  discount?: number;
+  purchasePrice: number;
+  sellingPrice: number;
+  variant: string;
+  size?: string;
+  color?: string;
   quantity: number;
-  variant?: string;
-}
+};
 
-export interface Cart {
-  id: string;
-  items: CartItem[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type TCustomerInfo = {
+  customerId: string;
+  customerName: string;
+  contactNumber: string;
+  email?: string;
+  city: string;
+  district: string;
+  address: string;
+};
