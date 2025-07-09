@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+
 import { Box, Typography, Button, Container } from "@mui/material";
 import Image from "next/image";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -23,7 +23,7 @@ const PromoBanner = () => {
           alt="Summer footwear collection"
           fill
           style={{
-            objectFit: "cover",
+            objectFit: "contain",
           }}
           priority
         />
