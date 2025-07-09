@@ -5,7 +5,6 @@ import { Box, Button, Container, Grid, Typography } from "@mui/material";
 import { useGetAllProductsQuery } from "@/redux/api/productApi";
 import ProductCard from "../../ProductCard/ProductCard";
 import ProductCardSkeleton from "../../AllProduct/ProductCardSekeleton/ProductCardSeketon";
-import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 
 const NewArrivalProduct = () => {
   const router = useRouter();
@@ -50,22 +49,6 @@ const NewArrivalProduct = () => {
           >
             New Arrivals
           </Typography>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <Button
-              variant="text"
-              onClick={handleViewAll}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                borderRadius: 2,
-                px: 3,
-                display: "flex",
-              }}
-            >
-              View All
-              <ArrowOutwardIcon sx={{ ml: 1 }} />
-            </Button>
-          </Box>
         </Box>
 
         {isLoading ? (
@@ -100,6 +83,21 @@ const NewArrivalProduct = () => {
             </Grid>
           </>
         )}
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Button
+            variant="outlined"
+            onClick={handleViewAll}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 3,
+            }}
+          >
+            View All Products
+          </Button>
+        </Box>
       </Container>
     </Box>
   );
