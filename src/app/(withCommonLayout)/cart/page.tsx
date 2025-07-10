@@ -3,10 +3,12 @@
 import {
   Box,
   Button,
+  Container,
   Divider,
   Grid,
   IconButton,
   Paper,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
@@ -24,23 +26,25 @@ import {
   clearCart,
   selectCartItems,
   selectTotalPrice,
-  selectShippingPrice,
-  setShippingPrice,
 } from "@/redux/features/cart/cartSlice";
 import { Delete, Add, Remove } from "@mui/icons-material";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const CartPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const cartItems = useSelector(selectCartItems);
   const totalPrice = useSelector(selectTotalPrice);
-  const shippingPrice = useSelector(selectShippingPrice);
-  const [isClient, setIsClient] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true);
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleQuantityChange = (
@@ -60,12 +64,106 @@ const CartPage = () => {
     router.push("/checkout");
   };
 
-  if (!isClient) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
+        <Typography variant="h4" gutterBottom>
+          <Skeleton width="40%" />
+        </Typography>
+
+        <Grid container spacing={4}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {["Product", "Price", "Quantity", "Total", "Action"].map(
+                      (header) => (
+                        <TableCell key={header}>
+                          <Skeleton width="60%" />
+                        </TableCell>
+                      )
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {[1, 2, 3].map((row) => (
+                    <TableRow key={row}>
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={2}>
+                          <Skeleton
+                            variant="rectangular"
+                            width={80}
+                            height={80}
+                          />
+                          <Box width="100%">
+                            <Skeleton width="80%" />
+                            <Skeleton width="60%" />
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Skeleton width="50%" />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Skeleton variant="circular" width={40} height={40} />
+                          <Skeleton width={60} height={40} sx={{ mx: 1 }} />
+                          <Skeleton variant="circular" width={40} height={40} />
+                        </Box>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Skeleton width="50%" />
+                      </TableCell>
+                      <TableCell align="right">
+                        <Skeleton variant="circular" width={40} height={40} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                <Skeleton width="40%" />
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+
+              <Box mb={2}>
+                <Box display="flex" justifyContent="space-between" mb={1}>
+                  <Skeleton width="30%" />
+                  <Skeleton width="20%" />
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={1}>
+                  <Skeleton width="30%" />
+                  <Skeleton width="20%" />
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              <Box display="flex" justifyContent="space-between" mb={3}>
+                <Skeleton width="30%" height={30} />
+                <Skeleton width="20%" height={30} />
+              </Box>
+
+              <Skeleton variant="rectangular" width="100%" height={40} />
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    );
   }
 
   return (
-    <Box sx={{ py: 4, px: { xs: 2, md: 4 } }}>
+    <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
       <Typography variant="h4" gutterBottom>
         Shopping Cart
       </Typography>
@@ -79,6 +177,13 @@ const CartPage = () => {
             variant="contained"
             color="primary"
             onClick={() => router.push("/products")}
+            sx={{
+              mt: 2,
+              background: "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
+              },
+            }}
           >
             Continue Shopping
           </Button>
@@ -102,12 +207,23 @@ const CartPage = () => {
                     <TableRow key={`${item.productId}-${item.variant}`}>
                       <TableCell>
                         <Box display="flex" alignItems="center" gap={2}>
-                          <Box
-                            component="img"
-                            src={item.image}
-                            alt={item.productName}
-                            sx={{ width: 80, height: 80, objectFit: "contain" }}
-                          />
+                          <Link href={`/product/${item.productId}`} passHref>
+                            <Box
+                              component="img"
+                              src={item.image}
+                              alt={item.productName}
+                              sx={{
+                                width: 80,
+                                height: 80,
+                                objectFit: "contain",
+                                cursor: "pointer",
+                                transition: "transform 0.3s ease",
+                                "&:hover": {
+                                  transform: "scale(1.05)",
+                                },
+                              }}
+                            />
+                          </Link>
                           <Box>
                             <Link
                               href={`/product/${item.productId}`}
@@ -128,12 +244,18 @@ const CartPage = () => {
                               </Typography>
                             </Link>
                             {item.color && (
-                              <Typography variant="body2">
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
                                 Color: {item.color}
                               </Typography>
                             )}
                             {item.size && (
-                              <Typography variant="body2">
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
                                 Size: {item.size}
                               </Typography>
                             )}
@@ -171,6 +293,15 @@ const CartPage = () => {
                               )
                             }
                             disabled={item.quantity <= 1}
+                            sx={{
+                              color:
+                                item.quantity <= 1
+                                  ? "text.disabled"
+                                  : "primary.main",
+                              "&:hover": {
+                                backgroundColor: "action.hover",
+                              },
+                            }}
                           >
                             <Remove />
                           </IconButton>
@@ -183,7 +314,22 @@ const CartPage = () => {
                                 parseInt(e.target.value) || 1
                               )
                             }
-                            sx={{ width: 60, textAlign: "center" }}
+                            sx={{
+                              width: 60,
+                              textAlign: "center",
+                              "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                  borderColor: "divider",
+                                },
+                                "&:hover fieldset": {
+                                  borderColor: "primary.main",
+                                },
+                              },
+                            }}
+                            inputProps={{
+                              style: { textAlign: "center" },
+                              min: 1,
+                            }}
                           />
                           <IconButton
                             onClick={() =>
@@ -193,20 +339,34 @@ const CartPage = () => {
                                 item.quantity + 1
                               )
                             }
+                            sx={{
+                              color: "primary.main",
+                              "&:hover": {
+                                backgroundColor: "action.hover",
+                              },
+                            }}
                           >
                             <Add />
                           </IconButton>
                         </Box>
                       </TableCell>
                       <TableCell align="center">
-                        ৳{(item.sellingPrice * item.quantity).toFixed(2)}
+                        <Typography fontWeight={600}>
+                          ৳{(item.sellingPrice * item.quantity).toFixed(2)}
+                        </Typography>
                       </TableCell>
                       <TableCell align="right">
                         <IconButton
                           onClick={() =>
                             handleRemoveItem(item.productId, item.variant)
                           }
-                          color="error"
+                          sx={{
+                            color: "error.main",
+                            "&:hover": {
+                              backgroundColor: "error.light",
+                              color: "white",
+                            },
+                          }}
                         >
                           <Delete />
                         </IconButton>
@@ -223,6 +383,12 @@ const CartPage = () => {
                 href="/products"
                 variant="outlined"
                 color="primary"
+                sx={{
+                  px: 3,
+                  "&:hover": {
+                    borderWidth: 2,
+                  },
+                }}
               >
                 Continue Shopping
               </Button>
@@ -230,6 +396,12 @@ const CartPage = () => {
                 variant="outlined"
                 color="error"
                 onClick={() => dispatch(clearCart())}
+                sx={{
+                  px: 3,
+                  "&:hover": {
+                    borderWidth: 2,
+                  },
+                }}
               >
                 Clear Cart
               </Button>
@@ -237,8 +409,16 @@ const CartPage = () => {
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+            <Paper
+              sx={{
+                p: 3,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
+                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <Typography variant="h6" gutterBottom fontWeight={600}>
                 Order Summary
               </Typography>
               <Divider sx={{ my: 2 }} />
@@ -246,7 +426,7 @@ const CartPage = () => {
               <Box mb={2}>
                 <Box display="flex" justifyContent="space-between" mb={1}>
                   <Typography>Subtotal:</Typography>
-                  <Typography>
+                  <Typography fontWeight={500}>
                     ৳
                     {cartItems
                       .reduce(
@@ -256,27 +436,15 @@ const CartPage = () => {
                       .toFixed(2)}
                   </Typography>
                 </Box>
-                <Box display="flex" justifyContent="space-between" mb={1}>
-                  <Typography>Shipping:</Typography>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <TextField
-                      size="small"
-                      value={shippingPrice}
-                      onChange={(e) =>
-                        dispatch(setShippingPrice(Number(e.target.value) || 0))
-                      }
-                      sx={{ width: 100 }}
-                    />
-                    <Typography>৳</Typography>
-                  </Box>
-                </Box>
               </Box>
 
               <Divider sx={{ my: 2 }} />
 
               <Box display="flex" justifyContent="space-between" mb={3}>
                 <Typography variant="h6">Total:</Typography>
-                <Typography variant="h6">৳{totalPrice.toFixed(2)}</Typography>
+                <Typography variant="h6" fontWeight={700}>
+                  ৳{totalPrice.toFixed(2)}
+                </Typography>
               </Box>
 
               <Button
@@ -286,6 +454,20 @@ const CartPage = () => {
                 size="large"
                 onClick={handleCheckout}
                 disabled={cartItems.length === 0}
+                sx={{
+                  height: 48,
+                  fontWeight: 600,
+                  background:
+                    "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
+                    boxShadow: "0px 4px 12px rgba(86, 72, 214, 0.3)",
+                  },
+                  "&:disabled": {
+                    background: "grey.300",
+                  },
+                }}
               >
                 Proceed to Checkout
               </Button>
@@ -293,7 +475,7 @@ const CartPage = () => {
           </Grid>
         </Grid>
       )}
-    </Box>
+    </Container>
   );
 };
 

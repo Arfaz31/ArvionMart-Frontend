@@ -13,6 +13,7 @@ import {
   Chip,
   Skeleton,
   Tooltip,
+  Container,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -223,7 +224,7 @@ const WishlistPage = () => {
                 color: "#333",
                 fontWeight: 600,
                 borderRadius: 1,
-                fontSize: "12px",
+                fontSize: "10px",
                 padding: "4px 8px",
                 "&:hover": {
                   backgroundColor: "rgba(255, 255, 255, 1)",
@@ -351,7 +352,7 @@ const WishlistPage = () => {
   };
 
   return (
-    <Box sx={{ py: 4, px: { xs: 2, md: 4 } }}>
+    <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
       <Box
         sx={{
           display: "flex",
@@ -407,7 +408,7 @@ const WishlistPage = () => {
           ))}
         </Grid>
       )}
-    </Box>
+    </Container>
   );
 };
 
