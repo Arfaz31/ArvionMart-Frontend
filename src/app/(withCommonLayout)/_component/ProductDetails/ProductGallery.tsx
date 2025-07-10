@@ -164,8 +164,8 @@ export default function ProductGallery({ product }: IProps) {
               key={`thumb-${index}`}
               onClick={() => setMainImageIndex(index)}
               sx={{
-                width: 60,
-                height: 60,
+                width: 90,
+                height: 90,
                 position: "relative",
                 cursor: "pointer",
                 border:

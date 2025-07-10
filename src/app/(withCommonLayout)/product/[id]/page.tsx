@@ -3,6 +3,7 @@ import { getSingleProduct } from "@/Services/ProductServices/GetSingleProduct";
 import ProductGallery from "../../_component/ProductDetails/ProductGallery";
 import ProductInfo from "../../_component/ProductDetails/ProductInfo";
 import ProductTabs from "../../_component/ProductDetails/ProductTabs";
+import RelatedProduct from "../../_component/ProductDetails/RelatedProduct";
 
 export default async function ProductDetailsPage({
   params,
@@ -30,6 +31,10 @@ export default async function ProductDetailsPage({
       {/* Tabbed Product Information */}
       <Box mt={8}>
         <ProductTabs product={product} />
+      </Box>
+      <Box sx={{ my: 10 }}>
+        {/* Related Product */}
+        <RelatedProduct currentProductId={product._id} />
       </Box>
     </Container>
   );
