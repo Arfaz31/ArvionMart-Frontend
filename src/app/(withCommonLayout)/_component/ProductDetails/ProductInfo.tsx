@@ -10,6 +10,12 @@ import {
   Chip,
   IconButton,
   Rating,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import {
   Favorite,
@@ -18,6 +24,12 @@ import {
   ShoppingCart,
   LocalShipping,
   Verified,
+  ContentCopy,
+  Facebook,
+  Twitter,
+  LinkedIn,
+  WhatsApp,
+  Close,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useMemo } from "react";
@@ -37,6 +49,8 @@ export default function ProductInfo({ product }: IProps) {
   const dispatch = useDispatch();
   const isInWishlist = useSelector(selectIsInWishList(product._id));
   const [quantity] = useState(1);
+  const [openShareModal, setOpenShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Fetch reviews for the product
   const { data: reviewsData, isLoading: reviewsLoading } =
@@ -44,6 +58,12 @@ export default function ProductInfo({ product }: IProps) {
       { productId: product._id },
       { skip: !product._id }
     );
+
+  // Get current URL for sharing
+  const productUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/products/${product._id}`
+      : "";
 
   const activeVariant = product.variant?.[0] || {};
   const discountPercentage = activeVariant.discount
@@ -108,6 +128,7 @@ export default function ProductInfo({ product }: IProps) {
         size: activeVariant.size,
         color: activeVariant.color,
         quantity: quantity,
+        image: activeVariant.image?.[0] || "",
       })
     );
   };
@@ -115,6 +136,43 @@ export default function ProductInfo({ product }: IProps) {
   const handleBuyNow = () => {
     handleAddToCart();
     // Navigate to checkout page
+  };
+
+  const handleShareClick = () => {
+    setOpenShareModal(true);
+  };
+
+  const handleCloseShareModal = () => {
+    setOpenShareModal(false);
+    setCopied(false);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(productUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareOnSocial = (platform: string) => {
+    let url = "";
+    const shareText = `Check out this product: ${product.productName}`;
+
+    switch (platform) {
+      case "facebook":
+        url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+        break;
+      case "twitter":
+        url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}`;
+        break;
+      case "linkedin":
+        url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(productUrl)}&title=${encodeURIComponent(product.productName)}`;
+        break;
+      case "whatsapp":
+        url = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${productUrl}`)}`;
+        break;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -323,6 +381,7 @@ export default function ProductInfo({ product }: IProps) {
           {isInWishlist ? <Favorite color="error" /> : <FavoriteBorder />}
         </IconButton>
         <IconButton
+          onClick={handleShareClick}
           sx={{
             border: "1px solid",
             borderColor: "grey.300",
@@ -336,6 +395,99 @@ export default function ProductInfo({ product }: IProps) {
           <Share />
         </IconButton>
       </Stack>
+
+      {/* Share Modal */}
+      <Dialog
+        open={openShareModal}
+        onClose={handleCloseShareModal}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6">Share this product</Typography>
+            <IconButton onClick={handleCloseShareModal}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              value={productUrl}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Button
+                      onClick={copyToClipboard}
+                      startIcon={<ContentCopy />}
+                      color={copied ? "success" : "primary"}
+                    >
+                      {copied ? "Copied!" : "Copy"}
+                    </Button>
+                  </InputAdornment>
+                ),
+                readOnly: true,
+              }}
+              sx={{ mb: 3 }}
+            />
+
+            <Typography variant="subtitle1" gutterBottom>
+              Share via:
+            </Typography>
+            <Stack direction="row" spacing={2} justifyContent="center">
+              <IconButton
+                onClick={() => shareOnSocial("facebook")}
+                sx={{
+                  backgroundColor: "#1877F2",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#166FE5" },
+                }}
+              >
+                <Facebook fontSize="large" />
+              </IconButton>
+              <IconButton
+                onClick={() => shareOnSocial("twitter")}
+                sx={{
+                  backgroundColor: "#1DA1F2",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#1A91DA" },
+                }}
+              >
+                <Twitter fontSize="large" />
+              </IconButton>
+              <IconButton
+                onClick={() => shareOnSocial("linkedin")}
+                sx={{
+                  backgroundColor: "#0A66C2",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#0959AB" },
+                }}
+              >
+                <LinkedIn fontSize="large" />
+              </IconButton>
+              <IconButton
+                onClick={() => shareOnSocial("whatsapp")}
+                sx={{
+                  backgroundColor: "#25D366",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#1EBE57" },
+                }}
+              >
+                <WhatsApp fontSize="large" />
+              </IconButton>
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseShareModal}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -114,6 +114,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         sellingPrice: primaryVariant.sellingPrice,
         variant: primaryVariant._id,
         quantity: 1,
+        image: primaryImage,
       })
     );
   };
