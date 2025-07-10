@@ -8,9 +8,10 @@ import RelatedProduct from "../../_component/ProductDetails/RelatedProduct";
 export default async function ProductDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { data: product } = await getSingleProduct(params.id);
+  const { id } = await params;
+  const { data: product } = await getSingleProduct(id);
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -20,14 +21,12 @@ export default async function ProductDetailsPage({
           <Grid size={{ xs: 12, md: 6 }}>
             <ProductGallery product={product} />
           </Grid>
-
           {/* Product Details */}
           <Grid size={{ xs: 12, md: 6 }}>
             <ProductInfo product={product} />
           </Grid>
         </Grid>
       </Box>
-
       {/* Tabbed Product Information */}
       <Box mt={8}>
         <ProductTabs product={product} />

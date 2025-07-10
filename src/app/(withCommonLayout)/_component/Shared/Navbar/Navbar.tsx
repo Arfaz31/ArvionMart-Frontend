@@ -29,7 +29,10 @@ const Navbar = ({ session }: { session: UserProps | null }) => {
   const { user } = useSelector((state: RootState) => state.auth as any);
   const wishlistCount = useSelector(selectWishListCount);
   const cartItems = useSelector(selectCartItems);
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // Fixed: Count unique items instead of total quantity
+  const cartCount = cartItems.length;
+
   const router = useRouter();
 
   const handleLogout = async () => {
