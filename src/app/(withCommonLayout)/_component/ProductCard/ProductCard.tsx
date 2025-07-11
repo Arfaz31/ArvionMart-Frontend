@@ -25,7 +25,6 @@ import { addProductToWishList } from "@/redux/features/wishList/wishListSlice";
 import { addToCart } from "@/redux/features/cart/cartSlice";
 import { IProduct, IVariant } from "@/types/product";
 
-// Provide default values for the variant
 const DEFAULT_VARIANT: IVariant = {
   _id: "",
   sellingPrice: 0,
@@ -46,7 +45,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
     e.stopPropagation();
     setIsFavorite(!isFavorite);
 
-    // Dispatch to wishlist
     if (!isFavorite) {
       dispatch(
         addProductToWishList({
@@ -73,8 +71,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    // Dispatch to cart
     dispatch(
       addToCart({
         productId: product._id,
@@ -99,14 +95,16 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 
   return (
     <Card
-      elevation={isHovered ? 6 : 2}
+      elevation={isHovered ? 4 : 2}
       sx={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
         position: "relative",
         transition: "all 0.3s ease",
-        borderRadius: { xs: 1, sm: 2 },
+        border: "1px solid #e0e0e0",
+        boxShadow: "none",
+        borderRadius: { xs: 1, sm: 2, lg: 1 },
         overflow: "hidden",
         cursor: "pointer",
         "&:hover": {
@@ -116,7 +114,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Top badges - Discount and New */}
+      {/* Top badges */}
       <Box
         sx={{
           position: "absolute",
@@ -154,7 +152,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             right: { xs: 4, sm: 8 },
             zIndex: 2,
             backgroundColor: "#1565c0",
-
             width: { xs: "28px", sm: "32px" },
             height: { xs: "28px", sm: "32px" },
             "&:hover": {
@@ -181,39 +178,47 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           position: "relative",
           width: "100%",
           aspectRatio: "1 / 1",
-          padding: { xs: "3px", sm: "5px" },
+          padding: 2,
           cursor: "pointer",
         }}
         onClick={handleProductClick}
       >
-        {!imageLoaded && (
-          <Skeleton
-            variant="rectangular"
-            width="100%"
-            height="100%"
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              borderRadius: 1,
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            borderRadius: "4px",
+            overflow: "hidden",
+          }}
+        >
+          {!imageLoaded && (
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height="100%"
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                borderRadius: 1,
+              }}
+            />
+          )}
+          <Image
+            src={primaryImage}
+            alt={product.productName}
+            onLoad={() => setImageLoaded(true)}
+            fill
+            style={{
+              objectFit: "contain",
+              transition: "transform 0.5s ease",
+              transform: isHovered ? "scale(1.05)" : "scale(1)",
             }}
           />
-        )}
-        <Image
-          src={primaryImage}
-          alt={product.productName}
-          onLoad={() => setImageLoaded(true)}
-          fill
-          style={{
-            objectFit: "contain",
-            transition: "transform 0.5s ease",
-            transform: isHovered ? "scale(1.05)" : "scale(1)",
-            borderRadius: "4px",
-          }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
+        </Box>
 
-        {/* View Details button - shows on hover and hidden on mobile */}
+        {/* View Details button */}
         <Box
           sx={{
             position: "absolute",
@@ -249,7 +254,11 @@ const ProductCard = ({ product }: { product: IProduct }) => {
 
       {/* Product content */}
       <CardContent
-        sx={{ flexGrow: 1, p: { xs: 1, sm: 2 }, pb: { xs: 1, sm: 2 } }}
+        sx={{
+          flexGrow: 1,
+          p: { xs: 1, sm: 2 },
+          pb: { xs: 1, sm: 2 },
+        }}
       >
         <Typography
           variant="subtitle1"
@@ -271,7 +280,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           {product.productName}
         </Typography>
 
-        {/* Brand name */}
         {product.brand && (
           <Typography
             variant="body2"
@@ -336,12 +344,22 @@ const ProductCard = ({ product }: { product: IProduct }) => {
         )}
       </CardContent>
 
-      {/* Add to cart button - Hidden on mobile */}
+      {/* Add to cart button */}
       <CardActions
         sx={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
           p: { xs: 1, sm: 2 },
           pt: 0,
-          display: { xs: "none", sm: "block" },
+          display: { xs: "none", sm: "flex" },
+          justifyContent: "center",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          transform: isHovered ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.3s ease",
+          zIndex: 2,
+          borderTop: "1px solid #f0f0f0",
         }}
       >
         <Button

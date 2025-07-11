@@ -1,192 +1,237 @@
 "use client";
-import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
-import { setCategoryName } from "@/redux/features/category/CategorySlice";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { ICategory } from "@/types/types";
 
 import {
   Box,
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Paper,
   Typography,
+  List,
+  ListItem,
+  ListItemButton,
+  Slider,
+  TextField,
+  InputAdornment,
+  Paper,
+  Checkbox,
+  FormControlLabel,
+  Divider,
 } from "@mui/material";
 
 const Sidebar = () => {
-  const { data: categories } = useGetCategoriesQuery([
-    { key: "fields", value: "categoryName" },
-    { key: "sort", value: "createdAt" },
-  ]);
-
-  const dispatch = useAppDispatch();
-  const { id } = useAppSelector((state) => state.category);
+  const categories = [
+    { name: "Body Soap", count: 37 },
+    { name: "Face Wash", count: 169 },
+    { name: "Face Mask", count: 21 },
+    { name: "Toner", count: 39 },
+    { name: "Face & Body Scrubs", count: 66 },
+    { name: "Shower Gel & Cream", count: 163 },
+    { name: "Hand Wash & Sanitizer", count: 8 },
+    { name: "Talcum Powder", count: 17 },
+  ];
 
   return (
-    <Box>
-      <Paper variant="outlined" elevation={2} sx={{ p: 3, mb: 3 }}>
-        {/* Categories Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "#B3F3F2",
-                width: "100%",
-                borderRadius: 1,
-                height: "50px",
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                Categories
-              </Typography>
-            </Box>
-          </Box>
-          {categories?.data?.length > 0 && (
-            <Box>
-              {categories?.data?.map((category: ICategory) => (
-                <Box
-                  key={category._id}
-                  sx={{
-                    py: 0.5,
-                    px: 2,
-                    borderRadius: 1,
-                    mb: 0.5,
+    <Paper
+      elevation={1}
+      sx={{
+        width: "100%",
+        maxWidth: 300,
+        backgroundColor: "white",
+        border: "1px solid #e0e0e0",
+        borderRadius: 2,
+        boxShadow: "none",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          backgroundColor: "#466cee",
+          color: "white",
+          py: 2,
+          px: 3,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            letterSpacing: "0.5px",
+          }}
+        >
+          FILTER PRODUCTS BY
+        </Typography>
+      </Box>
 
-                    "&:hover": { bgcolor: "#f5f5f5" },
-                    cursor: "pointer",
-                  }}
-                  // onClick={() => setCategoryFilter(category)}
-                >
-                  <FormGroup>
-                    <FormControlLabel
-                      onChange={() => {
-                        dispatch(
-                          setCategoryName({
-                            categoryName: category.categoryName,
-                            id: category._id,
-                          })
-                        );
-                      }}
-                      control={
-                        <Checkbox checked={id === category._id} size="small" />
-                      }
-                      label={category?.categoryName}
+      {/* Category Section */}
+      <Box sx={{ p: 3 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            color: "#333",
+            mb: 2,
+          }}
+        >
+          CATEGORY
+        </Typography>
+
+        <List sx={{ p: 0 }}>
+          {categories.map((category, index) => (
+            <ListItem key={index} disablePadding>
+              <ListItemButton
+                sx={{
+                  py: 0.5,
+                  px: 0,
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
                       sx={{
-                        "& .MuiFormControlLabel-label": {
-                          fontSize: "14px",
-                          color: "#333",
+                        color: "#666",
+                        "&.Mui-checked": {
+                          color: "#ff6b6b",
                         },
                       }}
                     />
-                  </FormGroup>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Box>
+                  }
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#666",
+                          fontSize: "0.875rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {category.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#999",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        ({category.count})
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{
+                    m: 0,
+                    "& .MuiFormControlLabel-label": {
+                      fontSize: "0.875rem",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
 
-        <Divider sx={{ my: 3 }} />
+      <Divider />
 
-        {/* Brand Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Brand
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Shoe Size Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Shoe Size
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Price Range Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Price Range
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Colors Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Colors
-            </Typography>
-          </Box>
-        </Box>
-
-        <Button
-          variant="contained"
-          fullWidth
+      {/* Price Section */}
+      <Box sx={{ p: 3 }}>
+        <Typography
+          variant="h6"
           sx={{
-            bgcolor: "#00a39b",
-            "&:hover": { bgcolor: "#008a82" },
-            py: 1,
+            fontWeight: "bold",
+            fontSize: "1rem",
+            color: "#333",
+            mb: 3,
           }}
         >
-          Apply Filters
-        </Button>
-      </Paper>
-    </Box>
+          PRICE
+        </Typography>
+
+        {/* Price Slider */}
+        <Box sx={{ px: 1, mb: 3 }}>
+          <Slider
+            valueLabelDisplay="auto"
+            min={0}
+            max={15000}
+            sx={{
+              color: "#ff6b6b",
+              "& .MuiSlider-thumb": {
+                backgroundColor: "#ff6b6b",
+                border: "2px solid #fff",
+                boxShadow: "0 0 0 8px rgba(255, 107, 107, 0.16)",
+              },
+              "& .MuiSlider-track": {
+                backgroundColor: "#ff6b6b",
+              },
+              "& .MuiSlider-rail": {
+                backgroundColor: "#ddd",
+              },
+            }}
+          />
+        </Box>
+
+        {/* Price Input Fields */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <TextField
+            size="small"
+            variant="outlined"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">TK</InputAdornment>
+              ),
+            }}
+            sx={{
+              flex: 1,
+              "& .MuiOutlinedInput-root": {
+                fontSize: "0.875rem",
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ff6b6b",
+                },
+              },
+            }}
+          />
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#666",
+              fontSize: "0.875rem",
+            }}
+          >
+            -
+          </Typography>
+
+          <TextField
+            size="small"
+            variant="outlined"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">TK</InputAdornment>
+              ),
+            }}
+            sx={{
+              flex: 1,
+              "& .MuiOutlinedInput-root": {
+                fontSize: "0.875rem",
+                "&.Mui-focused fieldset": {
+                  borderColor: "#ff6b6b",
+                },
+              },
+            }}
+          />
+        </Box>
+      </Box>
+    </Paper>
   );
 };
 
