@@ -75,7 +75,7 @@ const NewArrivalProduct = () => {
                 .map((product: any) => (
                   <Grid
                     key={product._id}
-                    size={{ xs: 6, sm: 6, md: 6, lg: 4, xl: 3 }}
+                    size={{ xs: 6, sm: 6, md: 6, lg: 2, xl: 2 }}
                   >
                     <ProductCard product={product} />
                   </Grid>

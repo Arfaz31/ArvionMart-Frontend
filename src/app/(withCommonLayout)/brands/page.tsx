@@ -23,8 +23,14 @@ const BrandPage = () => {
   const router = useRouter();
   const { data: brandsData, isLoading, error } = useGetAllBrandsQuery({});
 
-  const handleBrandClick = (brandId: string) => {
-    router.push(`/all-products/${brandId}`);
+  const handleBrandClick = (brandname: string) => {
+    const baseUrl = "/product";
+    const params = new URLSearchParams();
+    params.set("brand", brandname.toLowerCase());
+    params.set("page", "1");
+    params.set("limit", "10");
+    const finalPath = `${baseUrl}?${params.toString()}`;
+    router.push(finalPath);
   };
 
   if (isLoading) {
@@ -107,7 +113,7 @@ const BrandPage = () => {
                   borderColor: "#1976d2",
                 },
               }}
-              onClick={() => handleBrandClick(brand._id)}
+              onClick={() => handleBrandClick(brand.brandName)}
             >
               <CardContent
                 sx={{

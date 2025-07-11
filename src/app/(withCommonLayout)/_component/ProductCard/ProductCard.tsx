@@ -23,14 +23,7 @@ import {
 import Image from "next/image";
 import { addProductToWishList } from "@/redux/features/wishList/wishListSlice";
 import { addToCart } from "@/redux/features/cart/cartSlice";
-
-interface IVariant {
-  _id: string;
-  sellingPrice: number;
-  discount?: number;
-  image?: string[];
-  features?: string[];
-}
+import { IProduct, IVariant } from "@/types/product";
 
 // Provide default values for the variant
 const DEFAULT_VARIANT: IVariant = {
@@ -40,26 +33,6 @@ const DEFAULT_VARIANT: IVariant = {
   image: [],
   features: [],
 };
-
-interface IProduct {
-  _id: string;
-  productName: string;
-  description: string;
-  brand?: {
-    _id: string;
-    brandName: string;
-    brandLogo?: string;
-  };
-  category?: {
-    _id: string;
-    categoryName: string;
-  };
-  stock: number;
-  isActive: boolean;
-  isNewArrival?: boolean;
-  variant?: IVariant[];
-  createdAt?: string;
-}
 
 const ProductCard = ({ product }: { product: IProduct }) => {
   const router = useRouter();
@@ -168,19 +141,6 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             }}
           />
         )}
-        {product.isNewArrival && (
-          <Chip
-            label="New"
-            size="small"
-            sx={{
-              backgroundColor: "#4dabf7",
-              color: "white",
-              fontWeight: 600,
-              fontSize: { xs: "10px", sm: "12px" },
-              height: { xs: "20px", sm: "24px" },
-            }}
-          />
-        )}
       </Box>
 
       {/* Favorite button */}
@@ -193,11 +153,12 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             top: { xs: 4, sm: 8 },
             right: { xs: 4, sm: 8 },
             zIndex: 2,
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            backgroundColor: "#1565c0",
+
             width: { xs: "28px", sm: "32px" },
             height: { xs: "28px", sm: "32px" },
             "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 1)",
+              backgroundColor: "#1565c0",
             },
           }}
         >
@@ -208,7 +169,7 @@ const ProductCard = ({ product }: { product: IProduct }) => {
             />
           ) : (
             <FavoriteBorder
-              sx={{ color: "#666", fontSize: { xs: "16px", sm: "20px" } }}
+              sx={{ color: "white", fontSize: { xs: "16px", sm: "20px" } }}
             />
           )}
         </IconButton>
@@ -387,10 +348,10 @@ const ProductCard = ({ product }: { product: IProduct }) => {
           fullWidth
           variant="contained"
           startIcon={<ShoppingCart />}
-          size="medium"
           disabled={product.stock < 1}
           onClick={handleAddToCart}
           sx={{
+            height: "35px",
             fontWeight: 600,
             borderRadius: 1,
             justifyContent: "center",
