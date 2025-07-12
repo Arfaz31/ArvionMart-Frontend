@@ -45,7 +45,7 @@ const PromoCardItem = styled(Box)(({ theme }) => ({
 
 const PromoImage = styled(Box)(() => ({
   width: "100%",
-  borderRadius:"12px",
+  borderRadius: "12px",
   position: "relative",
   aspectRatio: "4 / 4", // Fixed aspect ratio
   overflow: "hidden", // Ensure the image respects the border radius
@@ -83,11 +83,11 @@ const PromoCardPage = () => {
 
   const handleCardClick = (banner: PromoBannerType) => {
     if (banner.categoryId) {
-      router.push(`/all-products/${banner.categoryId}`);
+      router.push(`/${banner.categoryId}`);
     } else if (banner.subcategoryId) {
-      router.push(`/all-products/${banner.subcategoryId}`);
+      router.push(`/${banner.subcategoryId}`);
     } else if (banner.secondarySubcategoryId) {
-      router.push(`/all-products/${banner.secondarySubcategoryId}`);
+      router.push(`/${banner.secondarySubcategoryId}`);
     } else if (banner.productId) {
       router.push(`/product/${banner.productId}`);
     }

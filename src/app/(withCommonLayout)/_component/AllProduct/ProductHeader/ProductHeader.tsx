@@ -1,42 +1,174 @@
-import { NavigateNext } from "@mui/icons-material";
-import { Box, Breadcrumbs, Container, Typography } from "@mui/material";
-import Link from "next/link";
+"use client";
+
+import { Box, IconButton } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+
+// Import your banner images
+import bannarpromo from "@/assests/allProducts/pr-banner.png";
+// Add more banner images as needed
+import banner2 from "@/assests/allProducts/banner-2.png"; // Add your second banner
 
 const ProductHeader = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Array of banner images - replace with your actual banner images
+  const banners = [
+    {
+      src: bannarpromo,
+      alt: "Promo Banner 1",
+    },
+    {
+      src: banner2,
+      alt: "Promo Banner 2",
+    },
+  ];
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % banners.length);
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, banners.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % banners.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
+
   return (
     <Box
       sx={{
-        bgcolor: "#00a39b",
-        color: "white",
-        py: 4,
+        position: "relative",
         mb: 4,
-        borderRadius: 3,
+        borderRadius: 1,
+        border: "1px solid #e0e0e0",
+        overflow: "hidden",
       }}
+      onMouseEnter={() => setIsAutoPlaying(false)}
+      onMouseLeave={() => setIsAutoPlaying(true)}
     >
-      <Container maxWidth="xl">
-        <Typography
-          variant="h3"
-          component="h1"
-          sx={{ fontWeight: "bold", mb: 2 }}
-        >
-          Products
-        </Typography>
-        <Breadcrumbs
-          separator={<NavigateNext fontSize="small" />}
-          aria-label="breadcrumb"
-          sx={{ color: "white" }}
-        >
-          <Link href="/" style={{ color: "white", textDecoration: "none" }}>
-            Home
-          </Link>
-          <Link
-            href="/all-products"
-            style={{ color: "white", textDecoration: "none" }}
+      {/* Carousel Container */}
+      <Box
+        sx={{
+          display: "flex",
+          transition: "transform 0.5s ease-in-out",
+          transform: `translateX(-${currentSlide * 100}%)`,
+        }}
+      >
+        {banners.map((banner, index) => (
+          <Box
+            key={index}
+            sx={{
+              minWidth: "100%",
+              width: "100%",
+              height: {
+                xs: "180px",
+                sm: "300px",
+                md: "400px",
+                lg: "500px",
+              },
+              position: "relative",
+            }}
           >
-            Product
-          </Link>
-        </Breadcrumbs>
-      </Container>
+            <Image
+              src={banner.src}
+              alt={banner.alt}
+              width={1000}
+              height={300}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          </Box>
+        ))}
+      </Box>
+
+      {/* Previous Button */}
+      <IconButton
+        onClick={prevSlide}
+        sx={{
+          position: "absolute",
+          left: 16,
+          top: "50%",
+          transform: "translateY(-50%)",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          color: "white",
+          "&:hover": {
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          },
+          zIndex: 2,
+        }}
+      >
+        <ChevronLeft />
+      </IconButton>
+
+      {/* Next Button */}
+      <IconButton
+        onClick={nextSlide}
+        sx={{
+          position: "absolute",
+          right: 16,
+          top: "50%",
+          transform: "translateY(-50%)",
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          color: "white",
+          "&:hover": {
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+          },
+          zIndex: 2,
+        }}
+      >
+        <ChevronRight />
+      </IconButton>
+
+      {/* Dot Indicators */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 16,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: 1,
+          zIndex: 2,
+        }}
+      >
+        {banners.map((_, index) => (
+          <Box
+            key={index}
+            onClick={() => goToSlide(index)}
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              backgroundColor:
+                currentSlide === index ? "white" : "rgba(255, 255, 255, 0.5)",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                backgroundColor: "white",
+              },
+            }}
+          />
+        ))}
+      </Box>
     </Box>
   );
 };

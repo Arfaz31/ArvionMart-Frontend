@@ -1,192 +1,167 @@
 "use client";
-import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
-import { setCategoryName } from "@/redux/features/category/CategorySlice";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { ICategory } from "@/types/types";
 
+import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
+import { ICategory } from "@/types/types";
 import {
   Box,
-  Button,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  Paper,
   Typography,
+  List,
+  ListItem,
+  ListItemButton,
+  Paper,
+  Checkbox,
+  FormControlLabel,
+  Divider,
 } from "@mui/material";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const Sidebar = () => {
-  const { data: categories } = useGetCategoriesQuery([
-    { key: "fields", value: "categoryName" },
-    { key: "sort", value: "createdAt" },
-  ]);
+import { useState } from "react";
+import SidebarBrand from "./SidebarBrand";
+import SidebarPrice from "./SidebarPrice";
 
-  const dispatch = useAppDispatch();
-  const { id } = useAppSelector((state) => state.category);
+const Sidebar = ({ toggleDrawer }: { toggleDrawer?: (open: boolean) => () => void }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { data: categories } = useGetCategoriesQuery({});
+  const router = useRouter();
+  const pathName = usePathname();
+  const searchQuery = useSearchParams();
+
+  const handleCategoryChange = (categoryName: string) => {
+    setSelectedCategory((prev) =>
+      prev === categoryName ? null : categoryName
+    );
+
+    const params = new URLSearchParams(searchQuery.toString());
+    if (selectedCategory === categoryName) {
+      params.delete("category");
+    } else {
+      params.set("category", categoryName);
+      params.set("page", "1");
+      params.set("limit", "10");
+    }
+    router.push(`${pathName}?${params.toString()}`);
+
+    if (toggleDrawer) {
+      toggleDrawer(false)();
+    }
+  };
 
   return (
-    <Box>
-      <Paper variant="outlined" elevation={2} sx={{ p: 3, mb: 3 }}>
-        {/* Categories Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "#B3F3F2",
-                width: "100%",
-                borderRadius: 1,
-                height: "50px",
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                Categories
-              </Typography>
-            </Box>
-          </Box>
-          {categories?.data?.length > 0 && (
-            <Box>
-              {categories?.data?.map((category: ICategory) => (
-                <Box
-                  key={category._id}
-                  sx={{
-                    py: 0.5,
-                    px: 2,
-                    borderRadius: 1,
-                    mb: 0.5,
+    <Paper
+      elevation={1}
+      sx={{
+        width: "100%",
+        maxWidth: 300,
+        backgroundColor: "white",
+        border: "1px solid #e0e0e0",
+        borderRadius: 2,
+        boxShadow: "none",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          backgroundColor: "#466cee",
+          color: "white",
+          py: 2,
+          px: 3,
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            letterSpacing: "0.5px",
+          }}
+        >
+          FILTER PRODUCTS BY
+        </Typography>
+      </Box>
 
-                    "&:hover": { bgcolor: "#f5f5f5" },
-                    cursor: "pointer",
-                  }}
-                  // onClick={() => setCategoryFilter(category)}
-                >
-                  <FormGroup>
-                    <FormControlLabel
-                      onChange={() => {
-                        dispatch(
-                          setCategoryName({
-                            categoryName: category.categoryName,
-                            id: category._id,
-                          })
-                        );
-                      }}
-                      control={
-                        <Checkbox checked={id === category._id} size="small" />
+      {/* Category Section */}
+      <Box sx={{ p: 3 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            color: "#333",
+            mb: 2,
+          }}
+        >
+          Category
+        </Typography>
+
+        <List sx={{ p: 0 }}>
+          {categories?.data?.map((category: ICategory) => (
+            <ListItem key={category._id} disablePadding>
+              <ListItemButton
+                sx={{
+                  py: 0.5,
+                  px: 0,
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                }}
+                onClick={() =>
+                  handleCategoryChange(category.categoryName.toLowerCase())
+                }
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={
+                        selectedCategory === category.categoryName.toLowerCase()
                       }
-                      label={category?.categoryName}
                       sx={{
-                        "& .MuiFormControlLabel-label": {
-                          fontSize: "14px",
-                          color: "#333",
+                        color: "#666",
+                        "&.Mui-checked": {
+                          color: "#466cee",
                         },
                       }}
                     />
-                  </FormGroup>
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Box>
+                  }
+                  label={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#666",
+                          fontSize: "0.875rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {category.categoryName.toLowerCase()}
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{
+                    m: 0,
+                    "& .MuiFormControlLabel-label": {
+                      fontSize: "0.875rem",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
 
-        <Divider sx={{ my: 3 }} />
+      <Divider />
 
-        {/* Brand Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Brand
-            </Typography>
-          </Box>
-        </Box>
+      <Box>
+        <SidebarBrand />
+      </Box>
 
-        <Divider sx={{ my: 3 }} />
+      <Divider />
 
-        {/* Shoe Size Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Shoe Size
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Price Range Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Price Range
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Colors Section */}
-        <Box sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-              cursor: "pointer",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Colors
-            </Typography>
-          </Box>
-        </Box>
-
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{
-            bgcolor: "#00a39b",
-            "&:hover": { bgcolor: "#008a82" },
-            py: 1,
-          }}
-        >
-          Apply Filters
-        </Button>
-      </Paper>
-    </Box>
+      {/* Price Section */}
+      <SidebarPrice />
+    </Paper>
   );
 };
 

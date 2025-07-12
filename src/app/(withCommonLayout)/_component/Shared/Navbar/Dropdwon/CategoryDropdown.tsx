@@ -28,8 +28,14 @@ const CategoryDropdown = () => {
     setCategoriesAnchor(null);
   };
 
-  const handleCategoryClick = (categoryId: string) => {
-    router.push(`/all-products/${categoryId}`);
+  const handleCategoryClick = (categoryName: string) => {
+    const baseUrl = "/product";
+    const params = new URLSearchParams();
+    params.set("category", categoryName.toLowerCase());
+    params.set("page", "1");
+    params.set("limit", "10");
+    const finalPath = `${baseUrl}?${params.toString()}`;
+    router.push(finalPath);
     handleCategoriesClose();
   };
 
@@ -71,7 +77,7 @@ const CategoryDropdown = () => {
           categories?.data?.map((category: ICategory) => (
             <MenuItem
               key={category._id}
-              onClick={() => handleCategoryClick(category._id)}
+              onClick={() => handleCategoryClick(category.categoryName)}
               sx={{
                 padding: "12px 16px",
                 "&:hover": {

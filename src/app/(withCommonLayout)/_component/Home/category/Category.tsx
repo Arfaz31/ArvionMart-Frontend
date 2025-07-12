@@ -4,6 +4,7 @@ import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
 import { Box, Container, Typography } from "@mui/material";
 import LoadingForCategory from "./LoadingForCategory";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface ICategory {
   _id: string;
@@ -13,6 +14,7 @@ interface ICategory {
 
 const Category = () => {
   const { data: category, isLoading, error } = useGetCategoriesQuery("");
+  const router = useRouter();
 
   // if (process.env.NODE_ENV === "development") {
   //   console.log("Fetched Categories:", category);
@@ -85,7 +87,11 @@ const Category = () => {
                       overflow: "hidden",
                       borderRadius: "8px",
                       boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+                      cursor: "pointer",
                     }}
+                    onClick={() =>
+                      router.push(`/${categoryData.categoryName.toLowerCase()}`)
+                    }
                   >
                     <Image
                       src={categoryData.imageUrl || "/placeholder.jpg"}
