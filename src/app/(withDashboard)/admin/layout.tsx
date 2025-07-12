@@ -60,7 +60,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   fontSize: "1.2rem",
                 }}
               >
-                PrimeShoes
+                ArvionMart
               </Box>
             </Box>
           ),

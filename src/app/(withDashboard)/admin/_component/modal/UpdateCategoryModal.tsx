@@ -1,23 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import ReuseableFileUploader from "@/Component/Forms/ReuseableFileUploader";
+import { Button, Grid, CircularProgress, Snackbar, Alert } from "@mui/material";
+import { SnackbarCloseReason } from "@mui/material/Snackbar";
 import ReuseableForm from "@/Component/Forms/ReuseableForm";
 import ReuseableInput from "@/Component/Forms/ReuseableInput";
+import ReuseableFileUploader from "@/Component/Forms/ReuseableFileUploader";
 import ReuseableModal from "@/Component/Modal/ReuseableModal";
-import { Button, Grid, Snackbar, Alert, CircularProgress } from "@mui/material";
-import { SnackbarCloseReason } from "@mui/material/Snackbar";
 import { FieldValues } from "react-hook-form";
 import { modifyPayload } from "@/utils/modifyPayload";
-import { useCreateBrandMutation } from "@/redux/api/brandApi";
+import { useUpdateCategoryMutation } from "@/redux/api/categoryApi";
 import { useState } from "react";
+import { MetaTagsField } from "@/Component/Forms/MetaTagsField";
+
+interface ICategory {
+  _id: string;
+  categoryName: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  metaTags: string[];
+  status: string;
+}
 
 type TProps = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  category: ICategory;
 };
 
-const BrandModal = ({ open, setOpen }: TProps) => {
-  const [createBrand] = useCreateBrandMutation();
+const UpdateCategoryModal = ({ open, setOpen, category }: TProps) => {
+  const [updateCategory, { isLoading }] = useUpdateCategoryMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -28,36 +40,44 @@ const BrandModal = ({ open, setOpen }: TProps) => {
   const handleSubmit = async (values: FieldValues) => {
     setIsSubmitting(true);
     try {
-      const imageFile =
-        values.brandImage instanceof File ? values.brandImage : null;
+      const imageFile = values.imageUrl?.[0] || null;
       const dataWithoutImage = {
-        brandName: values.brandName,
+        categoryName: values.categoryName,
         slug: values.slug,
         description: values.description,
+        metaTags: values.metaTags.filter((tag: string) => tag.trim() !== ""),
       };
-      const formData = modifyPayload(dataWithoutImage, "brandImage", imageFile);
-      const res = await createBrand(formData).unwrap();
+
+      const formData = modifyPayload(
+        dataWithoutImage,
+        "category-Image",
+        imageFile
+      );
+      const res = await updateCategory({
+        id: category._id,
+        payload: formData,
+      }).unwrap();
 
       if (res?.success) {
         setSnackbar({
           open: true,
-          message: res?.message || "Brand created successfully",
+          message: res.message || "Category updated successfully",
           severity: "success",
         });
         setOpen(false);
       } else {
         setSnackbar({
           open: true,
-          message: "Failed to create brand",
+          message: res?.message || "Failed to update category",
           severity: "error",
         });
       }
     } catch (error: any) {
-      console.error("Error creating brand:", error);
+      console.error("Error updating category:", error);
       setSnackbar({
         open: true,
         message:
-          error?.data?.message || error?.message || "Failed to create brand",
+          error?.data?.message || error?.message || "Failed to update category",
         severity: "error",
       });
     } finally {
@@ -77,22 +97,23 @@ const BrandModal = ({ open, setOpen }: TProps) => {
 
   return (
     <>
-      <ReuseableModal open={open} setOpen={setOpen} title="Create A Brand">
+      <ReuseableModal open={open} setOpen={setOpen} title="Update Category">
         <ReuseableForm
           onSubmit={handleSubmit}
           defaultValues={{
-            brandName: "",
-            slug: "",
-            description: "",
-            brandImage: undefined,
+            categoryName: category?.categoryName || "",
+            slug: category?.slug || "",
+            description: category?.description || "",
+            imageUrl: undefined,
+            metaTags: category?.metaTags?.length ? category.metaTags : [""],
           }}
         >
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
               <ReuseableInput
-                label="Brand Name"
+                label="Category Name"
                 fullWidth={true}
-                name="brandName"
+                name="categoryName"
                 required
               />
             </Grid>
@@ -113,8 +134,11 @@ const BrandModal = ({ open, setOpen }: TProps) => {
                 rows={4}
               />
             </Grid>
-            <Grid size={{ xs: 12 }}>
-              <ReuseableFileUploader label="Brand Logo" name="brandImage" />
+            <Grid size={{ xs: 12, md: 6 }}>
+              <ReuseableFileUploader label="Category Image" name="imageUrl" />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <MetaTagsField />
             </Grid>
           </Grid>
           <Button
@@ -122,25 +146,26 @@ const BrandModal = ({ open, setOpen }: TProps) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
-              "&:hover": {
-                background: "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
-                boxShadow: "0 4px 12px rgba(86, 72, 214, 0.3)",
-              },
+
               color: "white",
               width: "100%",
               height: 50,
               fontWeight: 600,
               fontSize: 14,
               margin: "20px 0px 10px 0px",
+              background: "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
+                boxShadow: "0 4px 12px rgba(86, 72, 214, 0.3)",
+              },
             }}
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
           >
-            {isSubmitting ? (
+            {isSubmitting || isLoading ? (
               <CircularProgress size={24} sx={{ color: "white" }} />
             ) : (
-              "Create Brand"
+              "Update Category"
             )}
           </Button>
         </ReuseableForm>
@@ -165,4 +190,4 @@ const BrandModal = ({ open, setOpen }: TProps) => {
   );
 };
 
-export default BrandModal;
+export default UpdateCategoryModal;

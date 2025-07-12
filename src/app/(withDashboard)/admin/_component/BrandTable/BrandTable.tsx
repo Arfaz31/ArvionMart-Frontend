@@ -8,7 +8,7 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import { useDeleteBrandMutation } from "@/redux/api/brandApi";
 import { toast } from "sonner";
 import UpdateBrandModal from "../modal/UpdateBrandModal";
-import DeleteConfirmationModal from "../modal/DeleteConfirmationModal";
+import DeleteConfirmationModal from "../modal/BrandDeleteConfirmationModal";
 
 // Define the Brand type interface
 interface Brand {
