@@ -5,11 +5,15 @@ const brandApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get All Brands
     getAllBrands: builder.query({
-      query: (params) => ({
-        url: "/brand/all-brand",
-        method: "GET",
-        params,
-      }),
+      query: (params) => {
+        // console.log("params:", params);
+
+        return {
+          url: "/brand/all-brand",
+          method: "GET",
+          params,
+        };
+      },
       providesTags: ["Brand"],
     }),
 
@@ -20,6 +24,7 @@ const brandApi = baseApi.injectEndpoints({
         method: "POST",
         contentType: "multipart/form-data",
         data: payload,
+        formData: true,
       }),
       invalidatesTags: ["Brand"],
     }),
@@ -31,6 +36,7 @@ const brandApi = baseApi.injectEndpoints({
         method: "PATCH",
         contentType: "multipart/form-data",
         data: payload,
+        formData: true,
       }),
       invalidatesTags: ["Brand"],
     }),
