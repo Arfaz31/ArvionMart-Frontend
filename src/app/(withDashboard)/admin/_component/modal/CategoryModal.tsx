@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
-import ReuseableFileUploader from "@/Component/Forms/ReuseableFileUploader";
+import { Button, Grid, CircularProgress, Snackbar, Alert } from "@mui/material";
+import { SnackbarCloseReason } from "@mui/material/Snackbar";
 import ReuseableForm from "@/Component/Forms/ReuseableForm";
 import ReuseableInput from "@/Component/Forms/ReuseableInput";
+import ReuseableFileUploader from "@/Component/Forms/ReuseableFileUploader";
 import ReuseableModal from "@/Component/Modal/ReuseableModal";
-import { Button, Grid } from "@mui/material";
 import { FieldValues } from "react-hook-form";
 import { modifyPayload } from "@/utils/modifyPayload";
-import { MetaTagsField } from "@/Component/Forms/MetaTagsField";
 import { useCreateCategoryMutation } from "@/redux/api/categoryApi";
-import { toast } from "sonner";
+import { useState } from "react";
+import { MetaTagsField } from "@/Component/Forms/MetaTagsField";
 
 type TProps = {
   open: boolean;
@@ -19,118 +19,161 @@ type TProps = {
 
 const CategoryModal = ({ open, setOpen }: TProps) => {
   const [createCategory, { isLoading }] = useCreateCategoryMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+
   const handleSubmit = async (values: FieldValues) => {
-    const { imageUrl, ...rest } = values;
-    console.log(imageUrl, rest);
+    setIsSubmitting(true);
     try {
-      const formData = modifyPayload(rest, "category-Image", imageUrl);
+      const imageFile =
+        values.imageUrl instanceof File ? values.imageUrl : null;
+      const dataWithoutImage = {
+        categoryName: values.categoryName,
+        slug: values.slug,
+        description: values.description,
+        metaTags: values.metaTags.filter((tag: string) => tag.trim() !== ""),
+      };
 
+      const formData = modifyPayload(
+        dataWithoutImage,
+        "category-Image",
+        imageFile
+      );
       const res = await createCategory(formData).unwrap();
-      if (res?.statusCode === 201) {
-        toast.success(res?.message);
-      }
 
-      setOpen(false);
+      if (res?.success) {
+        setSnackbar({
+          open: true,
+          message: res.message || "Category created successfully",
+          severity: "success",
+        });
+        setOpen(false);
+      } else {
+        setSnackbar({
+          open: true,
+          message: res?.message || "Failed to create category",
+          severity: "error",
+        });
+      }
     } catch (error: any) {
-      toast.error(error?.data?.message);
       console.error("Error creating category:", error);
+      setSnackbar({
+        open: true,
+        message:
+          error?.data?.message || error?.message || "Failed to create category",
+        severity: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const defaultValues = {
-    categoryName: "",
-    slug: "",
-    description: "",
-    imageUrl: "",
-    metaTags: [""], // Initialize with one empty field
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
-    <ReuseableModal open={open} setOpen={setOpen} title="Create A Category">
-      <ReuseableForm onSubmit={handleSubmit} defaultValues={defaultValues}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <ReuseableInput
-              label="Category Name"
-              fullWidth={true}
-              name="categoryName"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00a698",
-                  },
-                },
-                "& .MuiFormLabel-root.Mui-focused": {
-                  color: "#00a698",
-                },
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <ReuseableInput
-              label="Slug"
-              fullWidth={true}
-              name="slug"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00a698",
-                  },
-                },
-                "& .MuiFormLabel-root.Mui-focused": {
-                  color: "#00a698",
-                },
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <ReuseableInput
-              label="Description"
-              fullWidth={true}
-              name="description"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00a698",
-                  },
-                },
-                "& .MuiFormLabel-root.Mui-focused": {
-                  color: "#00a698",
-                },
-              }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <ReuseableFileUploader
-              label="Category Image"
-              name="imageUrl"
-              sx={{ bgcolor: "#00a698", color: "white" }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <MetaTagsField />
-          </Grid>
-        </Grid>
-        <Button
-          loading={isLoading}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "#20b2aa",
-            color: "white",
-            width: "100%",
-            height: 40,
-            fontWeight: 600,
-            fontSize: 14,
-            margin: "20px 0px 10px 0px",
+    <>
+      <ReuseableModal open={open} setOpen={setOpen} title="Create Category">
+        <ReuseableForm
+          onSubmit={handleSubmit}
+          defaultValues={{
+            categoryName: "",
+            slug: "",
+            description: "",
+            imageUrl: undefined,
+            metaTags: [""],
           }}
-          type="submit"
         >
-          Create Category
-        </Button>
-      </ReuseableForm>
-    </ReuseableModal>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <ReuseableInput
+                label="Category Name"
+                fullWidth={true}
+                name="categoryName"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <ReuseableInput
+                label="Slug"
+                fullWidth={true}
+                name="slug"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <ReuseableInput
+                label="Description"
+                fullWidth={true}
+                name="description"
+                multiline
+                rows={4}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <ReuseableFileUploader label="Category Image" name="imageUrl" />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <MetaTagsField />
+            </Grid>
+          </Grid>
+          <Button
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+
+              color: "white",
+              width: "100%",
+              height: 50,
+              fontWeight: 600,
+              fontSize: 14,
+              margin: "20px 0px 10px 0px",
+              background: "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
+              "&:hover": {
+                background: "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
+                boxShadow: "0 4px 12px rgba(86, 72, 214, 0.3)",
+              },
+            }}
+            type="submit"
+            disabled={isSubmitting || isLoading}
+          >
+            {isSubmitting || isLoading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Create Category"
+            )}
+          </Button>
+        </ReuseableForm>
+      </ReuseableModal>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

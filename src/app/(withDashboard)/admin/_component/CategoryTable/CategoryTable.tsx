@@ -1,72 +1,74 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
-import { Box, Typography, IconButton } from "@mui/material";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { Box, Typography, IconButton, Chip, Tooltip } from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Image from "next/image";
 import { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
+import { useDeleteCategoryMutation } from "@/redux/api/categoryApi";
+import { toast } from "sonner";
+import UpdateCategoryModal from "../modal/UpdateCategoryModal";
 
-// Define the Category type based on the API response
-interface Category {
+import CategoryDeleteConfirmationModal from "../modal/CategoryDeleteConfirmationModal";
+
+interface ICategory {
   _id: string;
   categoryName: string;
-  description: string;
   slug: string;
+  description: string;
   imageUrl: string;
+  metaTags: string[];
   status: string;
   isDeleted: boolean;
-  metaTags: string[];
-  createdAt: string;
-  updatedAt: string;
-  subCategory: any[];
-  product: any[];
 }
 
-// Define Meta type for pagination
-interface Meta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPage: number;
-}
-
-// Define API response structure
-interface CategoryResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  meta: Meta;
-  data: Category[];
-}
-
-// Define query parameter interface
-export interface QueryParam {
-  key: string;
-  value: number | string;
-}
-
-const CategoryTable = () => {
-  // State for pagination
+const CategoryTable = ({
+  categories,
+  meta,
+}: {
+  categories: ICategory[];
+  meta: any;
+}) => {
+  const [deleteCategory] = useDeleteCategoryMutation();
   const [paginationModel, setPaginationModel] = useState({
-    page: 0, // DataGrid uses 0-based indexing
+    page: 0,
     pageSize: 10,
   });
 
-  // Fetch categories data with the current page and limit
-  const {
-    data: categoryResponse,
-    isLoading,
-    error,
-  } = useGetCategoriesQuery([
-    { key: "page", value: paginationModel.page + 1 }, // API uses 1-based indexing
-    { key: "limit", value: paginationModel.pageSize },
-  ] as QueryParam[]);
+  // Modal states
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(
+    null
+  );
 
-  // Extract categories and meta from the response safely
-  const response = categoryResponse as CategoryResponse | undefined;
-  const categories = response?.data || [];
-  const meta = response?.meta || { page: 1, limit: 10, total: 0, totalPage: 0 };
+  // Handle update
+  const handleUpdateClick = (category: ICategory) => {
+    setSelectedCategory(category);
+    setUpdateModalOpen(true);
+  };
+
+  // Handle delete confirmation
+  const handleDeleteClick = (category: ICategory) => {
+    setSelectedCategory(category);
+    setDeleteModalOpen(true);
+  };
+
+  // Handle actual deletion
+  const handleConfirmDelete = async () => {
+    if (!selectedCategory) return;
+
+    try {
+      const res = await deleteCategory(selectedCategory._id).unwrap();
+      if (res.success) {
+        toast.success("Category deleted successfully");
+        setDeleteModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      toast.error("Failed to delete category");
+    }
+  };
 
   // Define columns for the DataGrid
   const columns: GridColDef[] = [
@@ -82,14 +84,14 @@ const CategoryTable = () => {
     },
     {
       field: "imageUrl",
-      headerName: "Category Image",
-      width: 180,
-      renderCell: ({ row }) => {
-        return (
-          <Box>
+      headerName: "Image",
+      width: 120,
+      renderCell: ({ row }) => (
+        <Box>
+          {row.imageUrl ? (
             <Image
               src={row.imageUrl}
-              alt="categoryImage"
+              alt={row.categoryName || "category image"}
               width={50}
               height={50}
               style={{
@@ -97,88 +99,115 @@ const CategoryTable = () => {
                 objectFit: "cover",
               }}
             />
-          </Box>
-        );
-      },
+          ) : (
+            <Box
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: "8px",
+                bgcolor: "grey.200",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="caption" color="text.secondary">
+                No image
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      ),
     },
     {
       field: "categoryName",
       headerName: "Category Name",
-      width: 180,
-      editable: false,
+      flex: 1,
     },
     {
       field: "slug",
       headerName: "Slug",
-      width: 150,
-      editable: false,
+      flex: 1,
     },
-
     {
       field: "status",
       headerName: "Status",
-      width: 140,
-      editable: false,
-    },
-    {
-      field: "metaTags",
-      headerName: "Meta Tags",
-      width: 180,
-      editable: false,
-      renderCell: (params: GridRenderCellParams<any, string[]>) => (
-        <Typography variant="body2">
-          {params.value &&
-          Array.isArray(params.value) &&
-          params.value.length > 0
-            ? params.value.slice(0, 2).join(", ") +
-              (params.value.length > 2 ? "..." : "")
-            : "N/A"}
-        </Typography>
+      flex: 1,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={params.value === "ACTIVE" ? "success" : "default"}
+          size="small"
+          variant="outlined"
+        />
       ),
     },
-
     {
       field: "action",
       headerName: "Action",
-      width: 100,
-      renderCell: () => (
+      flex: 1,
+      renderCell: ({ row }) => (
         <Box sx={{ display: "flex", gap: 1 }}>
-          <IconButton aria-label="edit">
-            <BorderColorIcon />
-          </IconButton>
-          <IconButton aria-label="delete">
-            <DeleteIcon />
-          </IconButton>
+          <Tooltip title="Edit">
+            <IconButton
+              aria-label="edit"
+              size="small"
+              onClick={() => handleUpdateClick(row)}
+            >
+              <BorderColorIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              aria-label="delete"
+              size="small"
+              color="error"
+              onClick={() => handleDeleteClick(row)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
       ),
     },
   ];
 
-  // Handle error state
-  if (error) {
-    return (
-      <Box sx={{ p: 2 }}>
-        <Typography color="error">Error loading categories</Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ width: "100%", height: 500 }}>
-      <DataGrid
-        rows={categories}
-        columns={columns}
-        getRowId={(row: Category) => row._id}
-        rowCount={meta.total}
-        pageSizeOptions={[5, 10, 25]}
-        paginationMode="server"
-        paginationModel={paginationModel}
-        onPaginationModelChange={setPaginationModel}
-        disableRowSelectionOnClick
-        checkboxSelection
-        loading={isLoading}
+    <>
+      <Box sx={{ width: "100%", height: 650 }}>
+        <DataGrid
+          rows={categories}
+          columns={columns}
+          getRowId={(row) => row._id}
+          rowCount={meta?.total || 0}
+          pageSizeOptions={[5, 10, 25, 50]}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          disableRowSelectionOnClick
+          loading={!categories.length}
+          density="standard"
+        />
+      </Box>
+
+      {/* Update Category Modal */}
+      {selectedCategory && (
+        <UpdateCategoryModal
+          open={updateModalOpen}
+          setOpen={setUpdateModalOpen}
+          category={selectedCategory}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      <CategoryDeleteConfirmationModal
+        open={deleteModalOpen}
+        setOpen={setDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title="Delete Category"
+        message={`Are you sure you want to delete ${selectedCategory?.categoryName || "this category"}?`}
       />
-    </Box>
+    </>
   );
 };
 

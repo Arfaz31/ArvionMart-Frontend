@@ -53,7 +53,15 @@ export const MetaTagsField = () => {
         onClick={() => append("")}
         variant="outlined"
         size="small"
-        sx={{ mt: 1, bgcolor: "#00a698", color: "white" }}
+        sx={{
+          mt: 1,
+          background: "linear-gradient(135deg, #1565c0 0%, #5648d6 100%)",
+          "&:hover": {
+            background: "linear-gradient(135deg, #0d47a1 0%, #4527a0 100%)",
+            boxShadow: "0 4px 12px rgba(86, 72, 214, 0.3)",
+          },
+          color: "white",
+        }}
       >
         Add Meta Tag
       </Button>
