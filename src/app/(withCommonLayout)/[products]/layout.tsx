@@ -5,7 +5,7 @@ import ProductHeader from "../_component/AllProduct/ProductHeader/ProductHeader"
 const ProductLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Grid container size={12} spacing={3}>
+      <Grid container size={12}>
         <Grid size={{ xs: 12, md: 3 }}>
           <Sidebar />
         </Grid>

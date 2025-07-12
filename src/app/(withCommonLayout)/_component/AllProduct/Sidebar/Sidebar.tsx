@@ -1,31 +1,46 @@
 "use client";
 
+import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
+import { ICategory } from "@/types/types";
 import {
   Box,
   Typography,
   List,
   ListItem,
   ListItemButton,
-  Slider,
-  TextField,
-  InputAdornment,
   Paper,
   Checkbox,
   FormControlLabel,
   Divider,
 } from "@mui/material";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { useState } from "react";
+import SidebarBrand from "./SidebarBrand";
+import SidebarPrice from "./SidebarPrice";
 
 const Sidebar = () => {
-  const categories = [
-    { name: "Body Soap", count: 37 },
-    { name: "Face Wash", count: 169 },
-    { name: "Face Mask", count: 21 },
-    { name: "Toner", count: 39 },
-    { name: "Face & Body Scrubs", count: 66 },
-    { name: "Shower Gel & Cream", count: 163 },
-    { name: "Hand Wash & Sanitizer", count: 8 },
-    { name: "Talcum Powder", count: 17 },
-  ];
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { data: categories } = useGetCategoriesQuery({});
+  const router = useRouter();
+  const pathName = usePathname();
+  const searchQuery = useSearchParams();
+
+  const handleCategoryChange = (categoryName: string) => {
+    setSelectedCategory((prev) =>
+      prev === categoryName ? null : categoryName
+    );
+
+    const params = new URLSearchParams(searchQuery.toString());
+    if (selectedCategory === categoryName) {
+      params.delete("category");
+    } else {
+      params.set("category", categoryName);
+      params.set("page", "1");
+      params.set("limit", "10");
+    }
+    router.push(`${pathName}?${params.toString()}`);
+  };
 
   return (
     <Paper
@@ -72,12 +87,12 @@ const Sidebar = () => {
             mb: 2,
           }}
         >
-          CATEGORY
+          Category
         </Typography>
 
         <List sx={{ p: 0 }}>
-          {categories.map((category, index) => (
-            <ListItem key={index} disablePadding>
+          {categories?.data?.map((category: ICategory) => (
+            <ListItem key={category._id} disablePadding>
               <ListItemButton
                 sx={{
                   py: 0.5,
@@ -86,15 +101,21 @@ const Sidebar = () => {
                     backgroundColor: "transparent",
                   },
                 }}
+                onClick={() =>
+                  handleCategoryChange(category.categoryName.toLowerCase())
+                }
               >
                 <FormControlLabel
                   control={
                     <Checkbox
                       size="small"
+                      checked={
+                        selectedCategory === category.categoryName.toLowerCase()
+                      }
                       sx={{
                         color: "#666",
                         "&.Mui-checked": {
-                          color: "#ff6b6b",
+                          color: "#466cee",
                         },
                       }}
                     />
@@ -109,16 +130,7 @@ const Sidebar = () => {
                           cursor: "pointer",
                         }}
                       >
-                        {category.name}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#999",
-                          fontSize: "0.875rem",
-                        }}
-                      >
-                        ({category.count})
+                        {category.categoryName.toLowerCase()}
                       </Typography>
                     </Box>
                   }
@@ -137,100 +149,14 @@ const Sidebar = () => {
 
       <Divider />
 
-      {/* Price Section */}
-      <Box sx={{ p: 3 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: "bold",
-            fontSize: "1rem",
-            color: "#333",
-            mb: 3,
-          }}
-        >
-          PRICE
-        </Typography>
-
-        {/* Price Slider */}
-        <Box sx={{ px: 1, mb: 3 }}>
-          <Slider
-            valueLabelDisplay="auto"
-            min={0}
-            max={15000}
-            sx={{
-              color: "#ff6b6b",
-              "& .MuiSlider-thumb": {
-                backgroundColor: "#ff6b6b",
-                border: "2px solid #fff",
-                boxShadow: "0 0 0 8px rgba(255, 107, 107, 0.16)",
-              },
-              "& .MuiSlider-track": {
-                backgroundColor: "#ff6b6b",
-              },
-              "& .MuiSlider-rail": {
-                backgroundColor: "#ddd",
-              },
-            }}
-          />
-        </Box>
-
-        {/* Price Input Fields */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <TextField
-            size="small"
-            variant="outlined"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">TK</InputAdornment>
-              ),
-            }}
-            sx={{
-              flex: 1,
-              "& .MuiOutlinedInput-root": {
-                fontSize: "0.875rem",
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ff6b6b",
-                },
-              },
-            }}
-          />
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: "#666",
-              fontSize: "0.875rem",
-            }}
-          >
-            -
-          </Typography>
-
-          <TextField
-            size="small"
-            variant="outlined"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">TK</InputAdornment>
-              ),
-            }}
-            sx={{
-              flex: 1,
-              "& .MuiOutlinedInput-root": {
-                fontSize: "0.875rem",
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ff6b6b",
-                },
-              },
-            }}
-          />
-        </Box>
+      <Box>
+        <SidebarBrand />
       </Box>
+
+      <Divider />
+
+      {/* Price Section */}
+      <SidebarPrice />
     </Paper>
   );
 };

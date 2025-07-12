@@ -110,6 +110,7 @@ export interface ShippingOption {
 
 type TStatus = "ACTIVE" | "INACTIVE";
 export interface IBrand {
+  _id: string;
   brandName: string;
   slug: string;
   description: string;

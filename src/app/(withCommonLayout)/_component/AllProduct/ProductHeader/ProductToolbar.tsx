@@ -38,6 +38,7 @@ const ProductToolbar = ({
         py: 2,
         px: { xs: 1, sm: 2 },
         backgroundColor: "#f5f5f5",
+        border: "1px solid #e0e0e0",
         borderRadius: 1,
         flexWrap: { xs: "wrap", sm: "nowrap" },
         gap: { xs: 1, sm: 2 },
@@ -59,7 +60,6 @@ const ProductToolbar = ({
             display: "flex",
             backgroundColor: "white",
             borderRadius: 1,
-            border: "1px solid #e0e0e0",
             overflow: "hidden",
           }}
         ></Box>
