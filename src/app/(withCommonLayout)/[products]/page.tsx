@@ -4,12 +4,13 @@ import { Box, Grid, Typography } from "@mui/material";
 import ProductCard from "../_component/ProductCard/ProductCard";
 import MPagination from "../_component/MPagination/MPagination";
 import ProductToolbar from "../_component/AllProduct/ProductHeader/ProductToolbar";
+import SearchIcon from "@mui/icons-material/Search";
 
 const AllProducts = async ({ searchParams }: any) => {
   const productData = await getAllProducts(searchParams);
 
   return (
-    <Box>
+    <Box sx={{ py: 5 }}>
       <Box sx={{ my: 2 }}>
         <ProductToolbar />
       </Box>
@@ -27,10 +28,13 @@ const AllProducts = async ({ searchParams }: any) => {
             textAlign: "center",
             height: "300px",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            gap: 2,
           }}
         >
+          <SearchIcon sx={{ fontSize: 60, color: "gray" }} />
           <Typography variant="h4" sx={{ fontWeight: "bold", color: "gray" }}>
             No Product Found
           </Typography>
@@ -38,7 +42,7 @@ const AllProducts = async ({ searchParams }: any) => {
       )}
 
       {productData?.data?.length > 0 && (
-        <Grid container justifyContent="center" sx={{ mt: 4 }} size={12}>
+        <Grid container justifyContent="center" sx={{ mt: 4 }}>
           <MPagination meta={productData?.meta} />
         </Grid>
       )}

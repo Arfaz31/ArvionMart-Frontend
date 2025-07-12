@@ -74,6 +74,13 @@ const ProductHeader = () => {
             key={index}
             sx={{
               minWidth: "100%",
+              width: "100%",
+              height: {
+                xs: "180px",
+                sm: "300px",
+                md: "400px",
+                lg: "500px",
+              },
               position: "relative",
             }}
           >
@@ -84,7 +91,7 @@ const ProductHeader = () => {
               height={300}
               style={{
                 width: "100%",
-                height: "300px",
+                height: "100%",
                 objectFit: "cover",
                 display: "block",
               }}

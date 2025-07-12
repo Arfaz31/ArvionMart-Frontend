@@ -19,7 +19,7 @@ import { useState } from "react";
 import SidebarBrand from "./SidebarBrand";
 import SidebarPrice from "./SidebarPrice";
 
-const Sidebar = () => {
+const Sidebar = ({ toggleDrawer }: { toggleDrawer?: (open: boolean) => () => void }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: categories } = useGetCategoriesQuery({});
   const router = useRouter();
@@ -40,6 +40,10 @@ const Sidebar = () => {
       params.set("limit", "10");
     }
     router.push(`${pathName}?${params.toString()}`);
+
+    if (toggleDrawer) {
+      toggleDrawer(false)();
+    }
   };
 
   return (

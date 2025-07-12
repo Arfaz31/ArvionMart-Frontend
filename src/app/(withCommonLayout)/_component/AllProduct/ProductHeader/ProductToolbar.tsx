@@ -8,26 +8,44 @@ import {
   MenuItem,
   IconButton,
   Tooltip,
+  useMediaQuery,
+  Drawer,
+  SelectChangeEvent,
 } from "@mui/material";
-import { KeyboardArrowUp } from "@mui/icons-material";
+import { KeyboardArrowUp, Menu } from "@mui/icons-material";
+import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Sidebar from "../Sidebar/Sidebar";
 
-const ProductToolbar = ({
-  totalItems = 545,
-  currentPage = 1,
-  itemsPerPage = 96,
-}) => {
-  // Calculate display range
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+const ProductToolbar = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const router = useRouter();
+  const pathName = usePathname();
+  const searchQuery = useSearchParams();
 
   const sortOptions = [
-    { value: "position", label: "Position" },
-    { value: "name", label: "Product Name" },
+    { value: "productName", label: "Product Name" },
     { value: "price", label: "Price" },
-    { value: "created_at", label: "Date Added" },
-    { value: "popularity", label: "Popularity" },
-    { value: "rating", label: "Rating" },
+    { value: "-createdAt", label: "Date Added" },
   ];
+
+  const toggleDrawer = (open: boolean) => () => {
+    setIsDrawerOpen(open);
+  };
+
+  const handleSortChange = (event: SelectChangeEvent<string>) => {
+    const sortBy = event.target.value;
+    const params = new URLSearchParams(searchQuery.toString());
+    params.set("sortBy", sortBy);
+    router.push(`${pathName}?${params.toString()}`);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <Box
@@ -54,26 +72,18 @@ const ProductToolbar = ({
           order: { xs: 1, sm: 1 },
         }}
       >
-        {/* View Toggle Buttons */}
-        <Box
-          sx={{
-            display: "flex",
-            backgroundColor: "white",
-            borderRadius: 1,
-            overflow: "hidden",
-          }}
-        ></Box>
-
-        {/* Item Count */}
-        <Typography
-          variant="body2"
-          sx={{
-            color: "#666",
-            fontSize: { xs: "0.875rem", sm: "0.875rem" },
-            whiteSpace: "nowrap",
-          }}
-        >
-          Items {startItem}-{endItem} of {totalItems}
+        {isMobile && (
+          <IconButton onClick={toggleDrawer(true)}>
+            <Menu />
+          </IconButton>
+        )}
+        <Drawer anchor="left" open={isDrawerOpen} onClose={toggleDrawer(false)}>
+          <Box sx={{ width: 300, p: 2 }}>
+            <Sidebar toggleDrawer={toggleDrawer} />
+          </Box>
+        </Drawer>
+        <Typography variant="body2" sx={{ color: "#666" }}>
+          Products
         </Typography>
       </Box>
 
@@ -85,17 +95,15 @@ const ProductToolbar = ({
           gap: 1,
           flex: { xs: "1 1 auto", sm: "0 0 auto" },
           order: { xs: 2, sm: 2 },
-          justifyContent: { xs: "flex-end", sm: "flex-end" },
+          justifyContent: { xs: "flex-start", sm: "flex-start" },
         }}
       >
-        {/* Sort By */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography
             variant="body2"
             sx={{
               color: "#666",
               fontSize: "0.875rem",
-              display: { xs: "none", sm: "block" },
             }}
           >
             Sort By
@@ -104,6 +112,8 @@ const ProductToolbar = ({
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <Select
               displayEmpty
+              value={searchQuery.get("sortBy") || "productName"}
+              onChange={handleSortChange}
               sx={{
                 backgroundColor: "white",
                 fontSize: "0.875rem",
@@ -127,9 +137,9 @@ const ProductToolbar = ({
           </FormControl>
         </Box>
 
-        {/* Scroll to Top Button */}
         <Tooltip title="Scroll to Top">
           <IconButton
+            onClick={scrollToTop}
             size="small"
             sx={{
               backgroundColor: "white",
