@@ -15,11 +15,13 @@ const reviewApi = baseApi.injectEndpoints({
 
     // Get Reviews by Product ID
     getReviewsByProduct: builder.query({
-      query: ({ productId, ...params }) => ({
-        url: `/review/product/${productId}`,
-        method: "GET",
-        params,
-      }),
+      query: (productId) => {
+        // console.log(productId);
+        return {
+          url: `/review/product/${productId}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Review"],
     }),
 

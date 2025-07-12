@@ -16,9 +16,9 @@ const Category = () => {
   const { data: category, isLoading, error } = useGetCategoriesQuery("");
   const router = useRouter();
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("Fetched Categories:", category);
-  }
+  // if (process.env.NODE_ENV === "development") {
+  //   console.log("Fetched Categories:", category);
+  // }
 
   return (
     <Box

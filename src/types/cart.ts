@@ -11,6 +11,7 @@ export type TOrderItem = {
   size?: string;
   color?: string;
   quantity: number;
+  image: string;
 };
 
 export type TCustomerInfo = {
